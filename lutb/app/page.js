@@ -51,7 +51,7 @@ export default function Home() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px' }}>
         <Link href="/colecao-verao" style={{ 
-          background: 'linear-gradient(180deg, #DAA520 0%, #FFD700 100%)', 
+          background: 'linear-gradient(180deg, #987317 0%, #cebb4b 100%)', 
           width: '47%', 
           height: '220px', 
           borderRadius: '25px', 
