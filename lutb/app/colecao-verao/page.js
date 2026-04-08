@@ -1,35 +1,39 @@
 "use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function ColecaoVerao() {
-  const produtosVerao = [
-    { 
-      id: 3, 
-      nome: "Moranguito", 
-      desc: "Feito à mão com pedras míticas encontradas no topo do Evereste e benzidas por freiras beneditinas. Sugestão: o colar pode trazer leveza e frescor ao visual, ideal para acompanhar peças leves e delicadas.",
-      img: "/moranguito.png" 
-    },
-    { 
-      id: 4, 
-      nome: "Tesouro tropical", 
-      desc: "Feito à mão com pérolas encontradas em um baú de pirata no fundo do mar. Atualmente está livre de maldições. Sugestão: o colar pode trazer um ar descontraído e luminoso à composição.",
-      img: "/tesouro-tropical.png" 
-    }
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
+  const produtos = [
+    { id: 3, nome: "Moranguito", img: "/moranguito.png" },
+    { id: 4, nome: "Tesouro Tropical", img: "/tesouro-tropical.png" }
   ];
+
+  if (loading) return null; 
 
   return (
     <div style={{ backgroundColor: '#76BA5B', minHeight: '100vh', padding: '20px' }}>
-      <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '15px 30px', display: 'inline-block', marginBottom: '20px' }}>
-        <h1 style={{ margin: 0, fontSize: '24px', color: '#2D2D1A' }}>Coleção Verão 2026</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <Link href="/">
+          <img src="/seta-voltar.png" alt="Voltar" style={{ width: '60px', height: '60px' }} />
+        </Link>
+        <div style={{ backgroundColor: 'white', padding: '10px 25px', borderRadius: '20px' }}>
+          <h2 style={{ margin: 0, fontSize: '20px', fontFamily: 'serif' }}>Coleção Verão 2026</h2>
+        </div>
+        <div style={{ width: '60px' }}></div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        {produtosVerao.map((p) => (
-          <Link href={`/produto/${p.id}`} key={p.id} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div style={{ backgroundColor: 'white', borderRadius: '30px', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-              <img src={p.img} alt={p.nome} style={{ width: '180px', marginBottom: '15px' }} />
-              <h2 style={{ fontSize: '22px', margin: '0 0 10px 0', color: '#333' }}>{p.nome}</h2>
-              <p style={{ fontSize: '14px', textAlign: 'center', color: '#555', lineHeight: '1.4' }}>{p.desc}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+        {produtos.map((prod) => (
+          <Link href={`/produto/${prod.id}`} key={prod.id} style={{ textDecoration: 'none' }}>
+            <div style={{ backgroundColor: 'white', borderRadius: '25px', padding: '15px', textAlign: 'center', height: '220px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <img src={prod.img} alt={prod.nome} style={{ width: '100%', height: '120px', objectFit: 'contain' }} />
+              <p style={{ color: '#333', fontWeight: 'bold', margin: '10px 0 0 0' }}>{prod.nome}</p>
             </div>
           </Link>
         ))}
