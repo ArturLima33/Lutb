@@ -1,74 +1,79 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 export default function Home() {
   const [bannerAtual, setBannerAtual] = useState(0);
-  const [historico, setHistorico] = useState(['Colar de Miçanga', 'Brinco Artesanal']);
 
   const banners = [
-    { id: 1, cor: 'var(--banner-orange)', img: '/colar1.png' },
-    { id: 2, cor: 'red', img: '/colar2.png' }
+    { id: 3, cor: 'linear-gradient(135deg, #FF8C00, #D2691E)', img: '/moranguito.png', link: '/novidades/3' },
+    { id: 2, cor: 'linear-gradient(135deg, #FF4500, #8B0000)', img: '/colar-musgo.png', link: '/novidades/2' }
   ];
 
+  const alternarBanner = () => setBannerAtual((prev) => (prev === 0 ? 1 : 0));
+
   return (
-    <div style={{ padding: '0 20px' }}>
-      
-      <div style={{ backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: '10px', padding: historico.length > 0 ? '10px' : '0', marginBottom: '10px' }}>
-        {historico.map((item, index) => (
-          <div key={index} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '5px 0' }}>
-            <span>{item}</span>
-          </div>
-        ))}
-        {historico.length > 0 && (
-          <button onClick={() => setHistorico([])} style={{ fontSize: '10px', border: 'none', background: 'none', color: 'red', cursor: 'pointer' }}>Limpar Histórico</button>
-        )}
-      </div>
-
-      <div style={{ position: 'relative', marginTop: '20px' }}>
-        <Link href={`/catalogo?banner=${banners[bannerAtual].id}`}>
-          <div style={{ 
-            background: banners[bannerAtual].cor, 
-            height: '220px', 
-            borderRadius: '25px', 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            overflow: 'hidden'
-          }}>
-            <img src={banners[bannerAtual].img} alt="Destaque" style={{ height: '90%', objectFit: 'contain' }} />
-          </div>
+    <div style={{ padding: '20px' }}>
+      <div style={{ 
+        background: banners[bannerAtual].cor, 
+        height: '210px', 
+        borderRadius: '25px', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        padding: '0 10px',
+        position: 'relative',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+      }}>
+        <button onClick={(e) => { e.preventDefault(); alternarBanner(); }} style={{ background: 'rgba(0, 0, 0, 0.3)', border: 'none', color: 'white', fontSize: '30px', cursor: 'pointer', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>‹</button>
+        
+        <Link href={banners[bannerAtual].link} style={{ height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <img src={banners[bannerAtual].img} alt="Destaque" style={{ height: '85%', objectFit: 'contain' }} />
         </Link>
-
-        <button 
-          onClick={() => setBannerAtual(bannerAtual === 0 ? 1 : 0)}
-          style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '45px', height: '45px', fontSize: '24px', cursor: 'pointer' }}
-        >‹</button>
-        <button 
-          onClick={() => setBannerAtual(bannerAtual === 0 ? 1 : 0)}
-          style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '45px', height: '45px', fontSize: '24px', cursor: 'pointer' }}
-        >›</button>
+        
+        <button onClick={(e) => { e.preventDefault(); alternarBanner(); }} style={{ background: 'rgba(0, 0, 0, 0.3)', border: 'none', color: 'white', fontSize: '30px', cursor: 'pointer', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>›</button>
+        
+        <div style={{ position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '8px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: bannerAtual === 0 ? 'white' : 'rgba(255,255,255,0.4)' }}></div>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: bannerAtual === 1 ? 'white' : 'rgba(255,255,255,0.4)' }}></div>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '10px' }}>
-        {banners.map((_, i) => (
-          <div key={i} style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: bannerAtual === i ? 'black' : 'rgba(0,0,0,0.3)' }}></div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px', gap: '15px' }}>
-        <Link href="/catalogo/verao" style={{ textDecoration: 'none', color: 'black', width: '50%' }}>
-          <div style={{ background: 'var(--card-verao)', height: '230px', borderRadius: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '15px' }}>
-             <img src="/sol-icon.png" style={{ width: '60px', marginBottom: '15px' }} />
-             <h3 style={{ fontSize: '18px' }}>Coleção<br/>Verão 2026</h3>
-          </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px' }}>
+        <Link href="/colecao-verao" style={{ 
+          background: 'linear-gradient(180deg, #DAA520 0%, #FFD700 100%)', 
+          width: '47%', 
+          height: '220px', 
+          borderRadius: '25px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          textAlign: 'center',
+          padding: '15px',
+          textDecoration: 'none',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+        }}>
+           <img src="/sol-icon.png" style={{ width: '75px', marginBottom: '15px' }} />
+           <h3 style={{ color: '#2D2D1A', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>Coleção Verão 2026</h3>
         </Link>
-
-        <Link href="/catalogo/pascoa" style={{ textDecoration: 'none', color: 'black', width: '50%' }}>
-          <div style={{ background: 'var(--card-pascoa)', height: '230px', borderRadius: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '15px' }}>
-             <img src="/coelho-icon.png" style={{ width: '60px', marginBottom: '15px' }} />
-             <h3 style={{ fontSize: '18px' }}>Coleção<br/>Páscoa 2026</h3>
-          </div>
+        
+        <Link href="/colecao-pascoa" style={{ 
+          background: 'linear-gradient(180deg, #8B4513 0%, #FFC0CB 100%)', 
+          width: '47%', 
+          height: '220px', 
+          borderRadius: '25px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          textAlign: 'center',
+          padding: '15px',
+          textDecoration: 'none',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+        }}>
+           <img src="/coelho-icon.png" style={{ width: '75px', marginBottom: '15px' }} />
+           <h3 style={{ color: '#2D2D1A', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>Coleção Páscoa 2026</h3>
         </Link>
       </div>
     </div>

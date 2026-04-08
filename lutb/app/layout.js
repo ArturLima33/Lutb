@@ -1,114 +1,135 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import "./globals.css";
 
 export default function RootLayout({ children }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [produtosOpen, setProdutosOpen] = useState(false);
+  const [colecoesOpen, setColecoesOpen] = useState(false);
+  const [categoriasOpen, setCategoriasOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <html lang="pt-br">
-      <body style={{ position: 'relative', overflowX: 'hidden', margin: 0, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <body style={{ position: 'relative', overflowX: 'hidden', margin: 0, backgroundColor: '#76BA5B', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         
         <div style={{
           position: 'fixed',
           top: 0,
           left: isMenuOpen ? 0 : '-100%',
-          width: '60%',
-          maxWidth: '250px',
+          width: '70%',
+          maxWidth: '280px',
           height: '100%',
           backgroundColor: '#2D2D1A',
           zIndex: 100,
-          transition: '0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: '0.3s',
           padding: '20px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '15px',
-          boxShadow: isMenuOpen ? '5px 0 15px rgba(0,0,0,0.3)' : 'none'
+          gap: '12px'
         }}>
-          <button onClick={() => setIsMenuOpen(false)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '30px', textAlign: 'left', cursor: 'pointer', marginBottom: '10px' }}>
-            ⓧ
+          <button onClick={() => setIsMenuOpen(false)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '24px', textAlign: 'left', cursor: 'pointer', marginBottom: '10px' }}>
+             <span style={{ border: '2px solid white', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</span>
           </button>
 
-          <Link href="/" onClick={() => setIsMenuOpen(false)} style={{ backgroundColor: '#228B22', color: 'white', padding: '12px 20px', borderRadius: '25px', textDecoration: 'none', textAlign: 'center', fontSize: '18px', fontWeight: 'bold' }}>Página Inicial</Link>
-          <Link href="/catalogo" onClick={() => setIsMenuOpen(false)} style={{ backgroundColor: '#9ACD32', color: 'black', padding: '12px 20px', borderRadius: '25px', textDecoration: 'none', textAlign: 'center', fontSize: '18px', fontWeight: 'bold' }}>Catálogo</Link>
+          <Link href="/" onClick={() => setIsMenuOpen(false)} style={{ backgroundColor: '#228B22', color: 'white', padding: '10px', borderRadius: '25px', textDecoration: 'none', textAlign: 'center', fontSize: '18px' }}>Página Inicial</Link>
+          <Link href="/catalogo" onClick={() => setIsMenuOpen(false)} style={{ backgroundColor: '#9ACD32', color: 'black', padding: '10px', borderRadius: '25px', textDecoration: 'none', textAlign: 'center', fontSize: '18px' }}>Catálogo</Link>
           
-          <button style={{ 
-            backgroundColor: '#D2691E', 
-            color: 'white', 
-            padding: '12px 20px', 
-            borderRadius: '25px', 
-            fontSize: '18px',
-            fontWeight: 'bold',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '8px',
-            transition: 'background-color 0.2s',
-            outline: 'none'
-          }}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#B25A1A'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#D2691E'}
-          >
-            Produtos <span style={{fontSize: '14px', position: 'relative', top: '2px'}}>⌄</span>
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <button onClick={() => setProdutosOpen(!produtosOpen)} style={{ backgroundColor: '#D2691E', color: 'white', padding: '10px 20px', borderRadius: '25px', fontSize: '18px', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+              <span style={{ margin: '0 auto' }}>Produtos</span>
+              <span style={{ position: 'absolute', right: '20px' }}>{produtosOpen ? '⌃' : '⌄'}</span>
+            </button>
+
+            {produtosOpen && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 5px' }}>
+                <button onClick={() => setColecoesOpen(!colecoesOpen)} style={{ backgroundColor: 'white', color: 'black', padding: '8px 20px', borderRadius: '20px', border: 'none', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                  <span style={{ margin: '0 auto' }}>Coleções</span>
+                  <span style={{ position: 'absolute', right: '15px' }}>{colecoesOpen ? '⌃' : '⌄'}</span>
+                </button>
+                {colecoesOpen && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'center' }}>
+                    <Link href="/colecao-verao" onClick={() => setIsMenuOpen(false)} style={{ backgroundColor: '#E0E0E0', color: 'black', textDecoration: 'none', fontSize: '13px', padding: '6px 20px', borderRadius: '15px', width: '85%', textAlign: 'center' }}>Coleção Verão</Link>
+                    <Link href="/colecao-pascoa" onClick={() => setIsMenuOpen(false)} style={{ backgroundColor: '#E0E0E0', color: 'black', textDecoration: 'none', fontSize: '13px', padding: '6px 20px', borderRadius: '15px', width: '85%', textAlign: 'center' }}>Coleção Páscoa</Link>
+                  </div>
+                )}
+
+                <button onClick={() => setCategoriasOpen(!categoriasOpen)} style={{ backgroundColor: 'white', color: 'black', padding: '8px 20px', borderRadius: '20px', border: 'none', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                  <span style={{ margin: '0 auto' }}>Categorias</span>
+                  <span style={{ position: 'absolute', right: '15px' }}>{categoriasOpen ? '⌃' : '⌄'}</span>
+                </button>
+                {categoriasOpen && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'center' }}>
+                    <Link href="/catalogo" onClick={() => setIsMenuOpen(false)} style={{ backgroundColor: '#E0E0E0', color: 'black', textDecoration: 'none', fontSize: '13px', padding: '6px 20px', borderRadius: '15px', width: '85%', textAlign: 'center' }}>Roupas</Link>
+                    <Link href="/catalogo" onClick={() => setIsMenuOpen(false)} style={{ backgroundColor: '#E0E0E0', color: 'black', textDecoration: 'none', fontSize: '13px', padding: '6px 20px', borderRadius: '15px', width: '85%', textAlign: 'center' }}>Acessórios</Link>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {isMenuOpen && <div onClick={() => setIsMenuOpen(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 90 }}></div>}
 
-        <header style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'var(--background-green)' }}>
-          <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1200px' }}>
-            <div onClick={() => setIsMenuOpen(true)} style={{ backgroundColor: '#2D2D2D', color: 'white', padding: '10px 15px', borderRadius: '12px', textAlign: 'center', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ fontSize: '20px' }}>☰</div>
-              <span style={{ fontSize: '10px', fontWeight: 'bold' }}>Menu</span>
+        <header style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div onClick={() => setIsMenuOpen(true)} style={{ backgroundColor: '#2D2D2D', color: 'white', padding: '10px 14px', borderRadius: '12px', textAlign: 'center', cursor: 'pointer' }}>
+              <div style={{ fontSize: '24px' }}>☰</div>
+              <span style={{ fontSize: '12px', fontWeight: 'bold' }}>Menu</span>
             </div>
             
-            <Link href="/">
-              <img src="/logo(lutb).png" alt="Logo" style={{ width: '85px', height: '85px', borderRadius: '50%', objectFit: 'cover' }} />
-            </Link>
-            <div style={{ width: '50px' }}></div>
+            {mounted && isHomePage ? (
+                <img src="/logo(lutb).png" alt="Logo" style={{ width: '100px', borderRadius: '50%' }} />
+            ) : (
+                <Link href="/">
+                    <img src="/logo(lutb).png" alt="Logo" style={{ width: '100px', borderRadius: '50%', cursor: 'pointer' }} />
+                </Link>
+            )}
+
+            <div style={{ width: '60px' }}></div>
           </div>
 
-          <div style={{ marginTop: '15px', width: '70%', maxWidth: '300px', position: 'relative' }}>
-             <div style={{ 
-               backgroundColor: 'rgba(0, 0, 0, 0.4)', 
-               borderRadius: '20px', 
-               display: 'flex', 
-               alignItems: 'center', 
-               padding: '5px 15px' 
-             }}>
-               <span style={{ color: 'white', marginRight: '8px', fontSize: '18px' }}>🔍</span>
-               <input 
-                 value={searchTerm}
-                 onChange={(e) => setSearchTerm(e.target.value)}
-                 type="text" 
-                 placeholder="Pesquisar" 
-                 style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontSize: '16px' }} 
-               />
-             </div>
-          </div>
+          {mounted && isHomePage && (
+            <div style={{ marginTop: '15px', width: '70%', maxWidth: '280px' }}>
+               <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.25)', borderRadius: '20px', display: 'flex', alignItems: 'center', padding: '8px 15px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                 <span style={{ color: 'white', marginRight: '8px' }}>🔍</span>
+                 <input 
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                   type="text" 
+                   placeholder="Pesquisar" 
+                   style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontSize: '16px' }} 
+                 />
+               </div>
+            </div>
+          )}
         </header>
 
-        <main style={{ flex: '1', width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
-          {children}
-        </main>
+        <main style={{ flex: 1 }}>{children}</main>
 
-        <footer style={{ backgroundColor: '#2D2D2D', color: 'white', padding: '25px 20px', marginTop: '40px', borderRadius: '30px 30px 0 0', width: '100%' }}>
-          <p style={{ textAlign: 'center', marginBottom: '20px', fontSize: '16px', fontWeight: 'bold' }}>Entre em Contato conosco</p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', alignItems: 'center' }}>
-             <a href="https://instagram.com/lutb.cc" target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'white', textDecoration: 'none', fontSize: '14px' }}>
-                <img src="/instagram.png" width="22" height="22" alt="" style={{ objectFit: 'contain' }} />
+        <footer style={{ backgroundColor: '#2D2D2D', color: 'white', padding: '20px 10px', marginTop: '40px', borderRadius: '30px 30px 0 0', textAlign: 'center' }}>
+          <p style={{ marginBottom: '15px', fontSize: '14px' }}>Entre em Contato conosco</p>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
+             <a href="https://instagram.com/lutb.cc" target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'white', textDecoration: 'none', fontSize: '13px' }}>
+                <img src="/instagram.png" width="22" height="22" alt="" />
                 <span>lutb.cc</span>
              </a>
-             <a href="https://wa.me/5581999999999" target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'white', textDecoration: 'none', fontSize: '14px' }}>
-                <img src="/whatsapp.png" width="22" height="22" alt="" style={{ objectFit: 'contain' }} />
+             <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '0px', color: 'white', textDecoration: 'none', fontSize: '13px' }}>
+                <img src="/whatsapp.png" width="40" height="40" alt="" />
                 <span>(81) xxxx-xxxx</span>
              </a>
           </div>
-          <p style={{ textAlign: 'center', fontSize: '11px', marginTop: '20px', opacity: '0.6' }}>© 2026 Lutb. Todos os direitos reservados</p>
+          <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', margin: 0 }}>© 2026 LutB. Todos os direitos reservados.</p>
         </footer>
       </body>
     </html>
