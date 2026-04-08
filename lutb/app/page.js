@@ -6,8 +6,18 @@ export default function Home() {
   const [bannerAtual, setBannerAtual] = useState(0);
 
   const banners = [
-    { id: 2, cor: 'linear-gradient(135deg, #FF8C00, #D2691E)', img: '/colar-musgo.png', link: '/novidades/2' },
-    { id: 3, cor: 'linear-gradient(135deg, #FF4500, #8B0000)', img: '/moranguito.png', link: '/novidades/3' }
+    { 
+      id: 2, 
+      cor: 'linear-gradient(135deg, #FF8C00, #D2691E)', 
+      img: '/colar-musgo.png', 
+      link: '/novidades/2' 
+    },
+    { 
+      id: 3, 
+      cor: 'linear-gradient(135deg, #FF4500, #8B0000)', 
+      img: '/moranguito.png', 
+      link: '/novidades/3' 
+    }
   ];
 
   const alternarBanner = () => setBannerAtual((prev) => (prev === 0 ? 1 : 0));
@@ -42,7 +52,17 @@ export default function Home() {
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px' }}>
         <Link href="/colecao-verao" style={{ 
           background: 'linear-gradient(180deg, #DAA520 0%, #FFD700 100%)', 
-          width: '47%', height: '220px', borderRadius: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '15px', textDecoration: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' 
+          width: '47%', 
+          height: '220px', 
+          borderRadius: '25px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          textAlign: 'center',
+          padding: '15px',
+          textDecoration: 'none',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
         }}>
            <img src="/sol-icon.png" style={{ width: '75px', marginBottom: '15px' }} />
            <h3 style={{ color: '#2D2D1A', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>Coleção Verão 2026</h3>
@@ -50,7 +70,17 @@ export default function Home() {
         
         <Link href="/colecao-pascoa" style={{ 
           background: 'linear-gradient(180deg, #8B4513 0%, #FFC0CB 100%)', 
-          width: '47%', height: '220px', borderRadius: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '15px', textDecoration: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' 
+          width: '47%', 
+          height: '220px', 
+          borderRadius: '25px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          textAlign: 'center',
+          padding: '15px',
+          textDecoration: 'none',
+          boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
         }}>
            <img src="/coelho-icon.png" style={{ width: '75px', marginBottom: '15px' }} />
            <h3 style={{ color: '#2D2D1A', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>Coleção Páscoa 2026</h3>
