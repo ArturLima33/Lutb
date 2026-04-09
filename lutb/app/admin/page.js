@@ -6,79 +6,75 @@ export default function Admin() {
   const [preco, setPreco] = useState("");
   const [desc, setDesc] = useState("");
   const [img, setImg] = useState("");
-
   const [produtos, setProdutos] = useState([]);
   const [editandoId, setEditandoId] = useState(null);
 
-  // carregar produtos
-  useEffect(() => {
-    const dados = JSON.parse(localStorage.getItem("produtos")) || [];
-    setProdutos(dados);
-  }, []);
-
-  // salvar no localStorage
-  const salvarProdutos = (lista) => {
-    setProdutos(lista);
-    localStorage.setItem("produtos", JSON.stringify(lista));
+  const headers = {
+    "X-Parse-Application-Id": "YiHW7CkrLOQwTbVFzuSWCopoensMUgLXTzhiEROz",
+    "X-Parse-REST-API-Key": "OaBOq7zWF7Fc8GNcyprMmqu2m1LA75tGwvUDWm6a",
+    "Content-Type": "application/json",
   };
 
-  // CREATE ou UPDATE
-  const salvarProduto = () => {
+  useEffect(() => {
+    carregarProdutos();
+  }, []);
+
+  const carregarProdutos = async () => {
+    const res = await fetch("https://parseapi.back4app.com/classes/Produto", { headers });
+    const data = await res.json();
+    setProdutos(data.results || []);
+  };
+
+  const salvarProduto = async () => {
     if (!nome.trim()) {
       alert("Nome é obrigatório!");
       return;
     }
 
-    if (editandoId) {
-      // EDITAR
-      const atualizados = produtos.map((p) =>
-        p.id === editandoId
-          ? { ...p, nome, preco, desc, img }
-          : p
-      );
+    const dados = { nome, preco, desc, img };
 
-      salvarProdutos(atualizados);
+    if (editandoId) {
+      await fetch(`https://parseapi.back4app.com/classes/Produto/${editandoId}`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(dados),
+      });
       setEditandoId(null);
     } else {
-      // CRIAR
-      const novo = {
-        id: Date.now(),
-        nome,
-        preco,
-        desc,
-        img,
-      };
-
-      salvarProdutos([...produtos, novo]);
+      await fetch("https://parseapi.back4app.com/classes/Produto", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(dados),
+      });
     }
 
-    // limpar campos
     setNome("");
     setPreco("");
     setDesc("");
     setImg("");
+    carregarProdutos();
   };
 
-  // DELETE
-  const removerProduto = (id) => {
-    const filtrados = produtos.filter((p) => p.id !== id);
-    salvarProdutos(filtrados);
+  const removerProduto = async (id) => {
+    await fetch(`https://parseapi.back4app.com/classes/Produto/${id}`, {
+      method: "DELETE",
+      headers,
+    });
+    carregarProdutos();
   };
 
-  // preencher para edição
   const editarProduto = (p) => {
     setNome(p.nome);
     setPreco(p.preco || "");
     setDesc(p.desc || "");
     setImg(p.img || "");
-    setEditandoId(p.id);
+    setEditandoId(p.objectId);
   };
 
   return (
     <div style={{ padding: "20px", maxWidth: "500px", margin: "0 auto" }}>
       <h1 style={{ textAlign: "center" }}>Admin</h1>
 
-      {/* FORM */}
       <input
         placeholder="Nome *"
         value={nome}
@@ -123,14 +119,13 @@ export default function Admin() {
         {editandoId ? "Salvar edição" : "Adicionar produto"}
       </button>
 
-      {/* LISTA */}
       <h2>Produtos cadastrados</h2>
 
       {produtos.length === 0 && <p>Nenhum produto ainda.</p>}
 
       {produtos.map((p) => (
         <div
-          key={p.id}
+          key={p.objectId}
           style={{
             background: "white",
             padding: "10px",
@@ -150,7 +145,7 @@ export default function Admin() {
 
           <div style={{ display: "flex", gap: "5px" }}>
             <button onClick={() => editarProduto(p)}>✏️</button>
-            <button onClick={() => removerProduto(p.id)}>🗑️</button>
+            <button onClick={() => removerProduto(p.objectId)}>🗑️</button>
           </div>
         </div>
       ))}
