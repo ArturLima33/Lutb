@@ -19,9 +19,6 @@ export default function ColecaoVerao() {
   return (
     <div style={{ backgroundColor: '#76BA5B', minHeight: '100vh', padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <Link href="/">
-          <img src="/seta-voltar.png" alt="Voltar" style={{ width: '60px', height: '60px' }} />
-        </Link>
         <div style={{ backgroundColor: 'white', padding: '10px 25px', borderRadius: '20px' }}>
           <h2 style={{ margin: 0, fontSize: '20px', fontFamily: 'serif' }}>Coleção Verão 2026</h2>
         </div>
