@@ -1,5 +1,9 @@
 # Lutb
 
-#Artur Bacalhau
-#Davi Magalhães
-#Luiz Camello
+Artur Bacalhau
+
+
+Davi Magalhães
+
+
+Luiz Camello
