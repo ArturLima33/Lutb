@@ -5,47 +5,45 @@ import { useEffect, useState } from "react";
 export default function ProdutoDetalhe() {
   const { id } = useParams();
   const router = useRouter();
-
   const [produto, setProduto] = useState(null);
 
   useEffect(() => {
+    const carregarDados = async () => {
+      const produtosFixos = [
+        { id: "1", nome: "Colar Bolhas", preco: "25,00", img: "/colar-bolhas.png", desc: "Inspirado na pureza das águas." },
+        { id: "2", nome: "Colar Musgo", preco: "35,00", img: "/colar-musgo.png", desc: "Representando a natureza." },
+        { id: "3", nome: "Moranguito", preco: "25,00", img: "/moranguito.png", desc: "Feito à mão com pedras selecionadas." },
+        { id: "4", nome: "Tesouro Tropical", preco: "35,00", img: "/tesouro-tropical.png", desc: "Explosão de cores tropicais." }
+      ];
 
-    const produtosFixos = [
-      { id: "1", nome: "Colar Bolhas", preco: "25,00", img: "/colar-bolhas.png", desc: "Inspirado na pureza das águas." },
-      { id: "2", nome: "Colar Musgo", preco: "35,00", img: "/colar-musgo.png", desc: "Representando a natureza." },
-      { id: "3", nome: "Moranguito", preco: "25,00", img: "/moranguito.png", desc: "Feito à mão com pedras selecionadas." },
-      { id: "4", nome: "Tesouro Tropical", preco: "35,00", img: "/tesouro-tropical.png", desc: "Explosão de cores tropicais." }
-    ];
-
-    const dados = localStorage.getItem("produtos");
-
-    let produtosAdmin = [];
-
-    if (dados) {
-      produtosAdmin = JSON.parse(dados).map((p) => ({
+      const res = await fetch("https://parseapi.back4app.com/classes/Produto", {
+        headers: {
+          "X-Parse-Application-Id": "YiHW7CkrLOQwTbVFzuSWCopoensMUgLXTzhiEROz",
+          "X-Parse-REST-API-Key": "OaBOq7zWF7Fc8GNcyprMmqu2m1LA75tGwvUDWm6a",
+        },
+      });
+      const data = await res.json();
+      
+      const produtosAdmin = (data.results || []).map((p) => ({
         ...p,
-        id: String(p.id),
-        preco: p.preco || null, // 🔥 corrigido
+        id: p.objectId,
+        preco: p.preco || null,
         img: p.img && p.img !== "" ? p.img : "/logo(lutb).png",
         desc: p.desc || "Lorem ipsum dolor sit amet."
       }));
-    }
 
-    const todos = [...produtosFixos, ...produtosAdmin];
+      const todos = [...produtosFixos, ...produtosAdmin];
+      const encontrado = todos.find((p) => String(p.id) === String(id));
+      setProduto(encontrado);
+    };
 
-    const encontrado = todos.find((p) => String(p.id) === String(id));
-
-    setProduto(encontrado);
-
+    carregarDados();
   }, [id]);
 
-  if (!produto) {
-    return <p style={{ textAlign: "center" }}>Produto não encontrado</p>;
-  }
+  if (!produto) return <p style={{ textAlign: "center", marginTop: "50px" }}>Carregando...</p>;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 20px' }}>
-      
       <div style={{ width: '100%', display: 'flex' }}>
         <button onClick={() => router.back()} style={{ background: 'none', border: 'none' }}>
           <img src="/seta-voltar.png" style={{ width: '70px' }} />
@@ -69,7 +67,6 @@ export default function ProdutoDetalhe() {
           {produto.preco ? `R$ ${produto.preco}` : "Preço indisponível"}
         </span>
       </div>
-
     </div>
   );
 }
