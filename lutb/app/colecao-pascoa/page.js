@@ -19,8 +19,12 @@ export default function ColecaoPascoa() {
 
   return (
     <div style={{ backgroundColor: '#76BA5B', minHeight: '100vh', padding: '20px' }}>
-      <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '15px 30px', display: 'inline-block', marginBottom: '20px' }}>
-        <h1 style={{ margin: 0, fontSize: '24px', color: '#2D2D1A' }}>Coleção Páscoa 2026</h1>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '15px 30px' }}>
+          <h1 style={{ margin: 0, fontSize: '24px', color: '#2D2D1A' }}>
+            Coleção Páscoa 2026
+          </h1>
+        </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

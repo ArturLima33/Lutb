@@ -6,15 +6,25 @@ export default function TelaCompra() {
   const params = useParams();
 
   const produtos = {
-    3: {
+    "1": {
+      nome: "Colar Bolhas",
+      img: "/colar-bolhas.png",
+      preco: "R$ 25,00"
+    },
+    "2": {
+      nome: "Colar Musgo",
+      img: "/colar-musgo.png",
+      preco: "R$ 35,00"
+    },
+    "3": {
       nome: "Moranguito",
       img: "/moranguito.png",
       preco: "R$ 25,00"
     },
-    4: {
+    "4": {
       nome: "Tesouro Tropical",
       img: "/tesouro-tropical.png",
-      preco: "R$ 30,00"
+      preco: "R$ 35,00"
     }
   };
 
@@ -25,14 +35,14 @@ export default function TelaCompra() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 20px' }}>
       <div style={{ width: '100%', display: 'flex' }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+        <button onClick={() => router.back()} style={{ background: 'none', border: 'none' }}>
           <img src="/seta-voltar.png" style={{ width: '70px' }} />
         </button>
       </div>
 
       <div style={{ backgroundColor: 'white', borderRadius: '40px', padding: '40px', width: '85%', marginTop: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <img src={produto.img} style={{ width: '100%', maxWidth: '250px' }} />
-        <h2 style={{ marginTop: '20px', color: '#333' }}>{produto.nome}</h2>
+        <h2 style={{ marginTop: '20px' }}>{produto.nome}</h2>
       </div>
 
       <div style={{ background: 'linear-gradient(180deg, #9ACD32 0%, #228B22 100%)', width: '90%', borderRadius: '20px', padding: '20px', marginTop: '30px', textAlign: 'center' }}>
