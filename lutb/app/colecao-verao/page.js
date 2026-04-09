@@ -14,15 +14,16 @@ export default function ColecaoVerao() {
     { id: 4, nome: "Tesouro Tropical", img: "/tesouro-tropical.png" }
   ];
 
-  if (loading) return null; 
+  if (loading) return null;
 
   return (
     <div style={{ backgroundColor: '#76BA5B', minHeight: '100vh', padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '30px' }}>
         <div style={{ backgroundColor: 'white', padding: '10px 25px', borderRadius: '20px' }}>
-          <h2 style={{ margin: 0, fontSize: '20px', fontFamily: 'serif' }}>Coleção Verão 2026</h2>
+          <h2 style={{ margin: 0, fontSize: '20px', fontFamily: 'serif' }}>
+            Coleção Verão 2026
+          </h2>
         </div>
-        <div style={{ width: '60px' }}></div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
