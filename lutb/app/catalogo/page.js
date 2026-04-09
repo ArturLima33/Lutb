@@ -3,47 +3,57 @@ import Link from "next/link";
 
 export default function Catalogo() {
   const produtos = [
-    { id: 1, nome: "Colar Bolhas", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", img: "/colar-bolhas.png" },
-    { id: 2, nome: "Colar Musgo", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", img: "/colar-musgo.png" },
-    { id: 3, nome: "Moranguito", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", img: "/moranguito.png" },
-    { id: 4, nome: "Colar Tesouro Tropical", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", img: "/tesouro-tropical.png" },
+    { id: 1, nome: "Colar Bolhas", preco: "25,00", img: "/colar-bolhas.png", desc: "Inspirado na pureza das águas, com detalhes em pérolas." },
+    { id: 2, nome: "Colar Musgo 2", preco: "35,00", img: "/colar-musgo.png", desc: "Representando o renascimento e a força da natureza." },
+    { id: 3, nome: "Moranguito", preco: "25,00", img: "/moranguito.png", desc: "Feito à mão com pedras selecionadas e pingente temático." },
+    { id: 4, nome: "Tesouro Tropical", preco: "35,00", img: "/tesouro-tropical.png", desc: "Uma explosão de cores que remete ao paraíso tropical." }
   ];
 
   return (
-    <div style={{ 
-      backgroundColor: '#76BA5B',
-      minHeight: '100vh',
-      display: 'flex',
-      justifyContent: 'center', // Centraliza a grade inteira na horizontal
-      padding: '20px'
-    }}>
+    <div style={{ padding: '0 20px 40px 20px' }}>
       <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(2, 1fr)', // Trava em 2 colunas fixas [ ] [ ]
-        gap: '20px', // Espaço entre os quadradinhos
-        maxWidth: '400px', // Controla a largura máxima da grade para não espalhar muito
-        width: '100%',
-        alignContent: 'start' 
+        backgroundColor: 'white', 
+        borderRadius: '15px', 
+        padding: '10px 30px', 
+        width: 'fit-content', 
+        margin: '0 auto 30px auto',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
       }}>
-        {produtos.map((produto) => (
-          <Link href={`/produto/${produto.id}`} key={produto.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <h2 style={{ margin: 0, fontSize: '20px', color: '#2D2D1A', textAlign: 'center' }}>Catálogo</h2>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+        {produtos.map((p) => (
+          <Link href={`/produto/${p.id}`} key={p.id} style={{ textDecoration: 'none' }}>
             <div style={{ 
               backgroundColor: 'white', 
-              borderRadius: '35px', // Bordas bem arredondadas como você pediu
-              padding: '15px', 
+              borderRadius: '35px', 
+              padding: '25px', 
               display: 'flex', 
               flexDirection: 'column', 
-              alignItems: 'center',
+              alignItems: 'center', 
               textAlign: 'center',
-              aspectRatio: '1 / 1', // Força o formato de "quadradinho"
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              boxShadow: '0 6px 15px rgba(0,0,0,0.1)'
             }}>
-              <div style={{ width: '100%', height: '60%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '8px' }}>
-                <img src={produto.img} alt={produto.nome} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
-              </div>
-              <h3 style={{ fontSize: '14px', margin: '0 0 4px 0', color: '#333', fontWeight: 'bold' }}>{produto.nome}</h3>
-              <p style={{ fontSize: '8px', color: '#666', margin: 0, lineHeight: '1.2', padding: '0 5px' }}>{produto.desc}</p>
+              <img src={p.img} alt={p.nome} style={{ width: '180px', height: '180px', objectFit: 'contain', marginBottom: '15px' }} />
+              <h3 style={{ 
+                color: '#E63946', 
+                fontSize: '26px', 
+                margin: '5px 0', 
+                fontWeight: 'bold',
+                fontFamily: 'serif'
+              }}>
+                {p.nome}
+              </h3>
+              <p style={{ 
+                color: '#555', 
+                fontSize: '14px', 
+                lineHeight: '1.5', 
+                margin: '10px 0 0 0',
+                maxWidth: '280px'
+              }}>
+                {p.desc}
+              </p>
             </div>
           </Link>
         ))}
