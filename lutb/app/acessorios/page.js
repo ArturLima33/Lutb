@@ -35,24 +35,24 @@ const produtos = [
 
 export default function Acessorios() {
   return (
-    <div style={{ 
-      backgroundColor: '#76BA5B', 
-      minHeight: '100vh', 
-      padding: '40px 20px', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center' 
+    <div style={{
+      backgroundColor: '#76BA5B',
+      minHeight: '100vh',
+      padding: '40px 20px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
     }}>
-      <div style={{ 
-        backgroundColor: 'white', 
-        borderRadius: '25px', 
-        padding: '25px 40px', 
-        width: '100%', 
-        maxWidth: '600px', 
-        textAlign: 'center', 
-        boxShadow: '0 6px 18px rgba(0,0,0,0.15)', 
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '25px',
+        padding: '25px 40px',
+        width: '100%',
+        maxWidth: '400px',
+        textAlign: 'center',
+        boxShadow: '0 6px 18px rgba(0,0,0,0.15)',
         marginBottom: '30px',
-        fontSize: '28px', 
+        fontSize: '28px',
         fontWeight: '600',
         fontFamily: 'serif',
         color: '#2D2D1A'
@@ -60,32 +60,36 @@ export default function Acessorios() {
         Acessórios
       </div>
 
-      <div style={{ 
-        backgroundColor: 'white', 
-        borderRadius: '25px', 
-        padding: '30px 40px', 
-        width: '100%', 
-        maxWidth: '600px', 
-        boxShadow: '0 6px 25px rgba(0,0,0,0.12)',
-        display: 'flex', 
-        flexDirection: 'column',
-        gap: '35px',
+      <div style={{
+        width: '100%',
+        maxWidth: '900px',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '30px'
       }}>
-        {produtos.map((produto) => (
-          <div key={produto.id} style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
-            <img 
-              src={produto.img} 
-              alt={produto.nome} 
-              style={{ width: '100px', height: '100px', objectFit: 'contain', borderRadius: '15px' }} 
+        {produtos.map(produto => (
+          <div key={produto.id} style={{
+            backgroundColor: 'white',
+            borderRadius: '25px',
+            padding: '25px',
+            boxShadow: '0 6px 20px rgba(0,0,0,0.12)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            fontFamily: 'serif'
+          }}>
+            <img
+              src={produto.img}
+              alt={produto.nome}
+              style={{ width: '180px', height: '180px', objectFit: 'contain', marginBottom: '15px', borderRadius: '15px' }}
             />
-            <div style={{ flex: 1, textAlign: 'left' }}>
-              <h3 style={{ fontSize: '22px', margin: '0 0 10px 0', fontFamily: 'serif', color: '#E63946' }}>
-                {produto.nome}
-              </h3>
-              <p style={{ fontSize: '16px', lineHeight: '1.4', color: '#333', fontFamily: 'serif' }}>
-                {produto.descricao}
-              </p>
-            </div>
+            <h3 style={{ color: '#E63946', fontSize: '22px', margin: '0 0 12px 0' }}>
+              {produto.nome}
+            </h3>
+            <p style={{ fontSize: '16px', color: '#333', lineHeight: '1.5' }}>
+              {produto.descricao}
+            </p>
           </div>
         ))}
       </div>
