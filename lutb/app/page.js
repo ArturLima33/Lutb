@@ -1,15 +1,93 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from "next/navigation";
 
 export default function Home() {
 
   const [frase, setFrase] = useState("");
+  const [busca, setBusca] = useState("");
+  const [sugestoes, setSugestoes] = useState([]);
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+  const [selecionado, setSelecionado] = useState(-1);
+
+  const router = useRouter();
+  const boxRef = useRef(null);
+
+  const produtos = [
+    { id: "1", nome: "Colar Bolhas" },
+    { id: "2", nome: "Colar Musgo" },
+    { id: "3", nome: "Moranguito" },
+    { id: "4", nome: "Tesouro Tropical" }
+  ];
 
   useEffect(() => {
     fetch("https://api.adviceslip.com/advice")
       .then(res => res.json())
       .then(data => setFrase(data.slip.advice));
+  }, []);
+
+  // 🔍 GERAR SUGESTÕES
+  useEffect(() => {
+    if (!busca.trim()) {
+      setSugestoes([]);
+      setSelecionado(-1);
+      return;
+    }
+
+    const termo = busca.toLowerCase();
+
+    const filtrados = produtos.filter(p =>
+      p.nome.toLowerCase().includes(termo)
+    );
+
+    setSugestoes(filtrados);
+    setSelecionado(-1);
+  }, [busca]);
+
+  // 🔎 PESQUISAR
+  const pesquisar = () => {
+    if (!busca.trim()) return;
+    router.push(`/busca?q=${busca}`);
+    setMostrarSugestoes(false);
+  };
+
+  // ⌨️ CONTROLE DO TECLADO
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelecionado(prev =>
+        prev < sugestoes.length - 1 ? prev + 1 : prev
+      );
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelecionado(prev =>
+        prev > 0 ? prev - 1 : -1
+      );
+    }
+
+    if (e.key === "Enter") {
+      if (selecionado >= 0) {
+        const item = sugestoes[selecionado];
+        router.push(`/produto/${item.id}`);
+      } else {
+        pesquisar();
+      }
+    }
+  };
+
+  // ❌ FECHAR AO CLICAR FORA
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (boxRef.current && !boxRef.current.contains(event.target)) {
+        setMostrarSugestoes(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const banners = [
@@ -37,6 +115,68 @@ export default function Home() {
 
   return (
     <div style={{ padding: '20px' }}>
+
+      {/* 🔍 BUSCA */}
+      <div ref={boxRef} style={{ marginBottom: "20px", position: "relative" }}>
+        
+        <div style={{ display: "flex", gap: "10px" }}>
+          <input
+            type="text"
+            placeholder="Buscar produto..."
+            value={busca}
+            onChange={(e) => {
+              setBusca(e.target.value);
+              setMostrarSugestoes(true);
+            }}
+            onKeyDown={handleKeyDown}
+            style={{
+              flex: 1,
+              padding: "10px",
+              borderRadius: "10px",
+              border: "none"
+            }}
+          />
+
+          <button onClick={pesquisar} style={{
+            padding: "10px 15px",
+            borderRadius: "10px",
+            border: "none",
+            backgroundColor: "#2D2D2D",
+            color: "white",
+            cursor: "pointer"
+          }}>
+            Buscar
+          </button>
+        </div>
+
+        {/* 📌 SUGESTÕES */}
+        {mostrarSugestoes && sugestoes.length > 0 && (
+          <div style={{
+            position: "absolute",
+            top: "45px",
+            width: "100%",
+            background: "white",
+            borderRadius: "10px",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+            zIndex: 10
+          }}>
+            {sugestoes.map((p, index) => (
+              <div
+                key={p.id}
+                onClick={() => router.push(`/produto/${p.id}`)}
+                style={{
+                  padding: "10px",
+                  cursor: "pointer",
+                  borderBottom: "1px solid #eee",
+                  backgroundColor: selecionado === index ? "#f0f0f0" : "white"
+                }}
+              >
+                {p.nome}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* CARROSSEL */}
       <div style={{ 
