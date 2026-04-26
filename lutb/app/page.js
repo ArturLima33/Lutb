@@ -15,10 +15,10 @@ export default function Home() {
   const boxRef = useRef(null);
 
   const produtos = [
-    { id: "1", nome: "Colar Bolhas" },
-    { id: "2", nome: "Colar Musgo" },
-    { id: "3", nome: "Moranguito" },
-    { id: "4", nome: "Tesouro Tropical" }
+    { id: "1", nome: "Colar Bolhas", descricao: "colar com bolhas delicadas" },
+    { id: "2", nome: "Colar Musgo", descricao: "inspiração natural verde musgo" },
+    { id: "3", nome: "Moranguito", descricao: "colar com pedra vermelha delicada" },
+    { id: "4", nome: "Tesouro Tropical", descricao: "cores vibrantes tropicais" }
   ];
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export default function Home() {
       .then(data => setFrase(data.slip.advice));
   }, []);
 
-  // 🔍 GERAR SUGESTÕES
+  // 🔍 GERAR SUGESTÕES (PRIORIDADE INTELIGENTE)
   useEffect(() => {
     if (!busca.trim()) {
       setSugestoes([]);
@@ -37,11 +37,18 @@ export default function Home() {
 
     const termo = busca.toLowerCase();
 
-    const filtrados = produtos.filter(p =>
-      p.nome.toLowerCase().includes(termo)
+    const comeca = produtos.filter(p =>
+      p.nome.toLowerCase().startsWith(termo)
     );
 
-    setSugestoes(filtrados);
+    const contem = produtos.filter(p =>
+      p.nome.toLowerCase().includes(termo) &&
+      !p.nome.toLowerCase().startsWith(termo)
+    );
+
+    const resultado = [...comeca, ...contem];
+
+    setSugestoes(resultado);
     setSelecionado(-1);
   }, [busca]);
 
@@ -57,19 +64,19 @@ export default function Home() {
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelecionado(prev =>
-        prev < sugestoes.length - 1 ? prev + 1 : prev
+        prev < sugestoes.length ? prev + 1 : prev
       );
     }
 
     if (e.key === "ArrowUp") {
       e.preventDefault();
       setSelecionado(prev =>
-        prev > 0 ? prev - 1 : -1
+        prev > -1 ? prev - 1 : prev
       );
     }
 
     if (e.key === "Enter") {
-      if (selecionado >= 0) {
+      if (selecionado >= 0 && selecionado < sugestoes.length) {
         const item = sugestoes[selecionado];
         router.push(`/produto/${item.id}`);
       } else {
@@ -89,6 +96,24 @@ export default function Home() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // ✨ DESTACAR TEXTO DIGITADO
+  const destacarTexto = (texto, termo) => {
+    const index = texto.toLowerCase().indexOf(termo.toLowerCase());
+    if (index === -1) return texto;
+
+    const inicio = texto.slice(0, index);
+    const meio = texto.slice(index, index + termo.length);
+    const fim = texto.slice(index + termo.length);
+
+    return (
+      <>
+        {inicio}
+        <strong>{meio}</strong>
+        {fim}
+      </>
+    );
+  };
 
   const banners = [
     { id: 2, cor: 'linear-gradient(135deg, #FF8C00, #D2691E)', img: '/colar-musgo.png', link: '/produto/2' },
@@ -150,7 +175,7 @@ export default function Home() {
         </div>
 
         {/* 📌 SUGESTÕES */}
-        {mostrarSugestoes && sugestoes.length > 0 && (
+        {mostrarSugestoes && busca && (
           <div style={{
             position: "absolute",
             top: "45px",
@@ -171,9 +196,22 @@ export default function Home() {
                   backgroundColor: selecionado === index ? "#f0f0f0" : "white"
                 }}
               >
-                {p.nome}
+                {destacarTexto(p.nome, busca)}
               </div>
             ))}
+
+            {/* 🔎 BUSCAR TERMO */}
+            <div
+              onClick={pesquisar}
+              style={{
+                padding: "10px",
+                cursor: "pointer",
+                backgroundColor: selecionado === sugestoes.length ? "#f0f0f0" : "#fafafa",
+                fontStyle: "italic"
+              }}
+            >
+              Buscar por "{busca}"
+            </div>
           </div>
         )}
       </div>
