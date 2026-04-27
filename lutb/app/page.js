@@ -10,24 +10,55 @@ export default function Home() {
   const [sugestoes, setSugestoes] = useState([]);
   const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
   const [selecionado, setSelecionado] = useState(-1);
+  const [produtos, setProdutos] = useState([]);
 
   const router = useRouter();
   const boxRef = useRef(null);
 
-  const produtos = [
-    { id: "1", nome: "Colar Bolhas", descricao: "colar com bolhas delicadas" },
-    { id: "2", nome: "Colar Musgo", descricao: "inspiração natural verde musgo" },
-    { id: "3", nome: "Moranguito", descricao: "colar com pedra vermelha delicada" },
-    { id: "4", nome: "Tesouro Tropical", descricao: "cores vibrantes tropicais" }
-  ];
-
+  // 🔥 FRASE
   useEffect(() => {
     fetch("https://api.adviceslip.com/advice")
       .then(res => res.json())
       .then(data => setFrase(data.slip.advice));
   }, []);
 
-  // 🔍 GERAR SUGESTÕES (PRIORIDADE INTELIGENTE)
+  // 🔥 CARREGAR PRODUTOS (FIXOS + ADMIN)
+  useEffect(() => {
+    const carregarProdutos = async () => {
+      try {
+        const res = await fetch("https://parseapi.back4app.com/classes/Produto", {
+          headers: {
+            "X-Parse-Application-Id": "YiHW7CkrLOQwTbVFzuSWCopoensMUgLXTzhiEROz",
+            "X-Parse-REST-API-Key": "OaBOq7zWF7Fc8GNcyprMmqu2m1LA75tGwvUDWm6a",
+          },
+        });
+
+        const data = await res.json();
+
+        const produtosFixos = [
+          { id: "1", nome: "Colar Bolhas", descricao: "colar com bolhas delicadas" },
+          { id: "2", nome: "Colar Musgo", descricao: "inspiração natural verde musgo" },
+          { id: "3", nome: "Moranguito", descricao: "colar com pedra vermelha delicada" },
+          { id: "4", nome: "Tesouro Tropical", descricao: "cores vibrantes tropicais" }
+        ];
+
+        const produtosAdmin = (data.results || []).map(p => ({
+          id: p.objectId,
+          nome: p.nome || "",
+          descricao: p.desc || ""
+        }));
+
+        setProdutos([...produtosFixos, ...produtosAdmin]);
+
+      } catch (err) {
+        console.error("Erro ao carregar produtos:", err);
+      }
+    };
+
+    carregarProdutos();
+  }, []);
+
+  // 🔍 GERAR SUGESTÕES
   useEffect(() => {
     if (!busca.trim()) {
       setSugestoes([]);
@@ -50,7 +81,8 @@ export default function Home() {
 
     setSugestoes(resultado);
     setSelecionado(-1);
-  }, [busca]);
+
+  }, [busca, produtos]);
 
   // 🔎 PESQUISAR
   const pesquisar = () => {
@@ -97,7 +129,7 @@ export default function Home() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✨ DESTACAR TEXTO DIGITADO
+  // ✨ DESTACAR TEXTO
   const destacarTexto = (texto, termo) => {
     const index = texto.toLowerCase().indexOf(termo.toLowerCase());
     if (index === -1) return texto;
@@ -115,6 +147,7 @@ export default function Home() {
     );
   };
 
+  // 🎞️ BANNERS
   const banners = [
     { id: 2, cor: 'linear-gradient(135deg, #FF8C00, #D2691E)', img: '/colar-musgo.png', link: '/produto/2' },
     { id: 3, cor: 'linear-gradient(135deg, #FF4500, #8B0000)', img: '/moranguito.png', link: '/produto/3' }
@@ -200,13 +233,12 @@ export default function Home() {
               </div>
             ))}
 
-            {/* 🔎 BUSCAR TERMO */}
             <div
               onClick={pesquisar}
               style={{
                 padding: "10px",
                 cursor: "pointer",
-                backgroundColor: selecionado === sugestoes.length ? "#f0f0f0" : "#fafafa",
+                backgroundColor: "#fafafa",
                 fontStyle: "italic"
               }}
             >
@@ -243,7 +275,7 @@ export default function Home() {
         }}>›</button>
       </div>
 
-      {/* API BONITINHA */}
+      {/* API */}
       <div style={{
         backgroundColor: 'white',
         marginTop: '25px',
