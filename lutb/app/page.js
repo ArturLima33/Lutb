@@ -1,158 +1,633 @@
 "use client";
+
 import { useState, useEffect, useRef } from 'react';
+
 import Link from 'next/link';
+
 import { useRouter } from "next/navigation";
 
+
+
 export default function Home() {
+
+
+
   const [frase, setFrase] = useState("");
+
   const [busca, setBusca] = useState("");
+
   const [sugestoes, setSugestoes] = useState([]);
+
   const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+
+  const [selecionado, setSelecionado] = useState(-1);
+
   const [produtos, setProdutos] = useState([]);
-  const [categorias, setCategorias] = useState([]);
-  const [bannerAtual, setBannerAtual] = useState(0);
+
+
 
   const router = useRouter();
+
   const boxRef = useRef(null);
 
-  const headers = {
-    "X-Parse-Application-Id": "YiHW7CkrLOQwTbVFzuSWCopoensMUgLXTzhiEROz",
-    "X-Parse-REST-API-Key": "OaBOq7zWF7Fc8GNcyprMmqu2m1LA75tGwvUDWm6a",
-  };
+
+
+  // 🔥 FRASE
 
   useEffect(() => {
-    // Busca a frase do conselho
-    fetch("https://api.adviceslip.com/advice").then(res => res.json()).then(data => setFrase(data.slip.advice));
-    
-    // Carrega dados do banco
-    const carregarDados = async () => {
-      const [resP, resC] = await Promise.all([
-        fetch("https://parseapi.back4app.com/classes/Produto", { headers }),
-        fetch("https://parseapi.back4app.com/classes/Categoria", { headers })
-      ]);
-      const dataP = await resP.json();
-      const dataC = await resC.json();
-      setProdutos(dataP.results || []);
-      setCategorias(dataC.results || []);
-    };
-    carregarDados();
+
+    fetch("https://api.adviceslip.com/advice")
+
+      .then(res => res.json())
+
+      .then(data => setFrase(data.slip.advice));
+
   }, []);
 
-  // FILTRO DO CARROSSEL (Pega o que você marcou no admin)
-  const bannersDB = produtos.filter(p => p.noCarrossel).map(p => ({
-    id: p.objectId,
-    cor: p.cor || "#E63946", 
-    img: p.img,
-    link: `/produto/${p.objectId}`
-  }));
 
-  // Se não tiver nada no banco, mantém os seus originais para não ficar vazio
-  const bannersExibicao = bannersDB.length > 0 ? bannersDB : [
-    { id: '1', cor: '#E63946', img: '/colar-coracao.png', link: '#' } 
+
+  // 🔥 CARREGAR PRODUTOS (FIXOS + ADMIN)
+
+  useEffect(() => {
+
+    const carregarProdutos = async () => {
+
+      try {
+
+        const res = await fetch("https://parseapi.back4app.com/classes/Produto", {
+
+          headers: {
+
+            "X-Parse-Application-Id": "YiHW7CkrLOQwTbVFzuSWCopoensMUgLXTzhiEROz",
+
+            "X-Parse-REST-API-Key": "OaBOq7zWF7Fc8GNcyprMmqu2m1LA75tGwvUDWm6a",
+
+          },
+
+        });
+
+
+
+        const data = await res.json();
+
+
+
+        const produtosFixos = [
+
+          { id: "1", nome: "Colar Bolhas", descricao: "colar com bolhas delicadas" },
+
+          { id: "2", nome: "Colar Musgo", descricao: "inspiração natural verde musgo" },
+
+          { id: "3", nome: "Moranguito", descricao: "colar com pedra vermelha delicada" },
+
+          { id: "4", nome: "Tesouro Tropical", descricao: "cores vibrantes tropicais" }
+
+        ];
+
+
+
+        const produtosAdmin = (data.results || []).map(p => ({
+
+          id: p.objectId,
+
+          nome: p.nome || "",
+
+          descricao: p.desc || ""
+
+        }));
+
+
+
+        setProdutos([...produtosFixos, ...produtosAdmin]);
+
+
+
+      } catch (err) {
+
+        console.error("Erro ao carregar produtos:", err);
+
+      }
+
+    };
+
+
+
+    carregarProdutos();
+
+  }, []);
+
+
+
+  // 🔍 GERAR SUGESTÕES
+
+  useEffect(() => {
+
+    if (!busca.trim()) {
+
+      setSugestoes([]);
+
+      setSelecionado(-1);
+
+      return;
+
+    }
+
+
+
+    const termo = busca.toLowerCase();
+
+
+
+    const comeca = produtos.filter(p =>
+
+      p.nome.toLowerCase().startsWith(termo)
+
+    );
+
+
+
+    const contem = produtos.filter(p =>
+
+      p.nome.toLowerCase().includes(termo) &&
+
+      !p.nome.toLowerCase().startsWith(termo)
+
+    );
+
+
+
+    const resultado = [...comeca, ...contem];
+
+
+
+    setSugestoes(resultado);
+
+    setSelecionado(-1);
+
+
+
+  }, [busca, produtos]);
+
+
+
+  // 🔎 PESQUISAR
+
+  const pesquisar = () => {
+
+    if (!busca.trim()) return;
+
+    router.push(`/busca?q=${busca}`);
+
+    setMostrarSugestoes(false);
+
+  };
+
+
+
+  // ⌨️ CONTROLE DO TECLADO
+
+  const handleKeyDown = (e) => {
+
+    if (e.key === "ArrowDown") {
+
+      e.preventDefault();
+
+      setSelecionado(prev =>
+
+        prev < sugestoes.length ? prev + 1 : prev
+
+      );
+
+    }
+
+
+
+    if (e.key === "ArrowUp") {
+
+      e.preventDefault();
+
+      setSelecionado(prev =>
+
+        prev > -1 ? prev - 1 : prev
+
+      );
+
+    }
+
+
+
+    if (e.key === "Enter") {
+
+      if (selecionado >= 0 && selecionado < sugestoes.length) {
+
+        const item = sugestoes[selecionado];
+
+        router.push(`/produto/${item.id}`);
+
+      } else {
+
+        pesquisar();
+
+      }
+
+    }
+
+  };
+
+
+
+  // ❌ FECHAR AO CLICAR FORA
+
+  useEffect(() => {
+
+    const handleClickOutside = (event) => {
+
+      if (boxRef.current && !boxRef.current.contains(event.target)) {
+
+        setMostrarSugestoes(false);
+
+      }
+
+    };
+
+
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+  }, []);
+
+
+
+  // ✨ DESTACAR TEXTO
+
+  const destacarTexto = (texto, termo) => {
+
+    const index = texto.toLowerCase().indexOf(termo.toLowerCase());
+
+    if (index === -1) return texto;
+
+
+
+    const inicio = texto.slice(0, index);
+
+    const meio = texto.slice(index, index + termo.length);
+
+    const fim = texto.slice(index + termo.length);
+
+
+
+    return (
+
+      <>
+
+        {inicio}
+
+        <strong>{meio}</strong>
+
+        {fim}
+
+      </>
+
+    );
+
+  };
+
+
+
+  // 🎞️ BANNERS
+
+  const banners = [
+
+    { id: 2, cor: 'linear-gradient(135deg, #FF8C00, #D2691E)', img: '/colar-musgo.png', link: '/produto/2' },
+
+    { id: 3, cor: 'linear-gradient(135deg, #FF4500, #8B0000)', img: '/moranguito.png', link: '/produto/3' }
+
   ];
 
-  const colecoesHome = categorias.filter(c => c.naHome).slice(0, 2);
 
-  // Troca automática de banner
+
+  const [bannerAtual, setBannerAtual] = useState(0);
+
+
+
   useEffect(() => {
-    if (bannersExibicao.length > 1) {
-      const intervalo = setInterval(() => {
-        setBannerAtual(prev => (prev + 1) % bannersExibicao.length);
-      }, 4000);
-      return () => clearInterval(intervalo);
+
+    const intervalo = setInterval(() => {
+
+      setBannerAtual(prev => (prev + 1) % banners.length);
+
+    }, 3000);
+
+
+
+    return () => clearInterval(intervalo);
+
+  }, []);
+
+
+
+  const alternarBanner = (direcao) => {
+
+    if (direcao === 'prev') {
+
+      setBannerAtual(prev => (prev === 0 ? banners.length - 1 : prev - 1));
+
+    } else {
+
+      setBannerAtual(prev => (prev + 1) % banners.length);
+
     }
-  }, [bannersExibicao]);
+
+  };
+
+
 
   return (
-    <main style={{ backgroundColor: '#7FB35D', minHeight: '100vh', padding: '20px' }}>
-      
-      {/* LOGO SUPERIOR */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
-        <div style={{ backgroundColor: '#A3B899', borderRadius: '50%', width: '100px', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '4px solid #758A6B' }}>
-          <span style={{ color: 'white', fontWeight: 'bold', fontSize: '20px', fontFamily: 'serif' }}>LUT.B</span>
+
+    <div style={{ padding: '20px' }}>
+
+
+
+      {/* 🔍 BUSCA */}
+
+      <div ref={boxRef} style={{ marginBottom: "20px", position: "relative" }}>
+
+       
+
+        <div style={{ display: "flex", gap: "10px" }}>
+
+          <input
+
+            type="text"
+
+            placeholder="Buscar produto..."
+
+            value={busca}
+
+            onChange={(e) => {
+
+              setBusca(e.target.value);
+
+              setMostrarSugestoes(true);
+
+            }}
+
+            onKeyDown={handleKeyDown}
+
+            style={{
+
+              flex: 1,
+
+              padding: "10px",
+
+              borderRadius: "10px",
+
+              border: "none"
+
+            }}
+
+          />
+
+
+
+          <button onClick={pesquisar} style={{
+
+            padding: "10px 15px",
+
+            borderRadius: "10px",
+
+            border: "none",
+
+            backgroundColor: "#2D2D2D",
+
+            color: "white",
+
+            cursor: "pointer"
+
+          }}>
+
+            Buscar
+
+          </button>
+
         </div>
-      </div>
 
-      {/* BUSCA */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '30px' }}>
-        <input 
-          type="text" 
-          placeholder="Buscar produto..." 
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          style={{ width: '300px', padding: '12px 20px', borderRadius: '15px', border: 'none', outline: 'none' }} 
-        />
-        <button style={{ backgroundColor: '#333', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '15px', cursor: 'pointer' }}>
-          Buscar
-        </button>
-      </div>
 
-      {/* CARROSSEL (EXATAMENTE COMO NO PRINT) */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
-        <div style={{ 
-          backgroundColor: bannersExibicao[bannerAtual].cor, 
-          width: '500px', 
-          height: '280px', 
-          borderRadius: '40px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          padding: '0 20px',
-          position: 'relative'
-        }}>
-          <button onClick={() => setBannerAtual(prev => (prev === 0 ? bannersExibicao.length - 1 : prev - 1))} style={setaStyle}>‹</button>
-          
-          <Link href={bannersExibicao[bannerAtual].link} style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-            <img src={bannersExibicao[bannerAtual].img} style={{ maxHeight: '200px', objectFit: 'contain' }} />
-          </Link>
 
-          <button onClick={() => setBannerAtual(prev => (prev + 1) % bannersExibicao.length)} style={setaStyle}>›</button>
-        </div>
-      </div>
+        {/* 📌 SUGESTÕES */}
 
-      {/* DICA DO DIA */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
-        <div style={{ backgroundColor: 'white', width: '500px', padding: '30px', borderRadius: '40px', textAlign: 'center' }}>
-          <h3 style={{ margin: '0 0 10px 0', fontFamily: 'serif', fontSize: '22px' }}>Dica do dia ✨</h3>
-          <p style={{ fontStyle: 'italic', color: '#555', margin: 0 }}>{frase || "Life is better when you sing about bananas."}</p>
-        </div>
-      </div>
+        {mostrarSugestoes && busca && (
 
-      {/* COLEÇÕES FIXADAS NA HOME */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-        {colecoesHome.map((cat) => (
-          <Link key={cat.objectId} href={`/colecao/${cat.nome.toLowerCase()}`} style={{ textDecoration: 'none' }}>
-            <div style={{ 
-              background: `linear-gradient(180deg, ${cat.cor1}, ${cat.cor2})`, 
-              width: '240px', 
-              height: '240px', 
-              borderRadius: '40px', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              justifyContent: 'center' 
-            }}>
-              <h3 style={{ color: 'white', margin: 0, fontSize: '20px' }}>Coleção</h3>
-              <h2 style={{ color: 'white', margin: 0, fontSize: '28px', textTransform: 'capitalize' }}>{cat.nome}</h2>
+          <div style={{
+
+            position: "absolute",
+
+            top: "45px",
+
+            width: "100%",
+
+            background: "white",
+
+            borderRadius: "10px",
+
+            boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+
+            zIndex: 10
+
+          }}>
+
+            {sugestoes.map((p, index) => (
+
+              <div
+
+                key={p.id}
+
+                onClick={() => router.push(`/produto/${p.id}`)}
+
+                style={{
+
+                  padding: "10px",
+
+                  cursor: "pointer",
+
+                  borderBottom: "1px solid #eee",
+
+                  backgroundColor: selecionado === index ? "#f0f0f0" : "white"
+
+                }}
+
+              >
+
+                {destacarTexto(p.nome, busca)}
+
+              </div>
+
+            ))}
+
+
+
+            <div
+
+              onClick={pesquisar}
+
+              style={{
+
+                padding: "10px",
+
+                cursor: "pointer",
+
+                backgroundColor: "#fafafa",
+
+                fontStyle: "italic"
+
+              }}
+
+            >
+
+              Buscar por "{busca}"
+
             </div>
-          </Link>
-        ))}
+
+          </div>
+
+        )}
+
       </div>
 
-    </main>
-  );
-}
 
-const setaStyle = {
-  backgroundColor: 'rgba(255,255,255,0.4)',
-  border: 'none',
-  color: 'white',
-  width: '40px',
-  height: '40px',
-  borderRadius: '50%',
-  fontSize: '24px',
-  cursor: 'pointer',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center'
-};
+
+      {/* CARROSSEL */}
+
+      <div style={{
+
+        background: banners[bannerAtual].cor,
+
+        height: '210px',
+
+        borderRadius: '25px',
+
+        display: 'flex',
+
+        alignItems: 'center',
+
+        justifyContent: 'space-between',
+
+        padding: '0 10px',
+
+        position: 'relative',
+
+        boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+
+      }}>
+
+        <button onClick={() => alternarBanner('prev')} style={{
+
+          background: 'rgba(0, 0, 0, 0.3)', border: 'none', color: 'white',
+
+          fontSize: '30px', cursor: 'pointer', borderRadius: '50%', width: '45px', height: '45px'
+
+        }}>‹</button>
+
+       
+
+        <Link href={banners[bannerAtual].link} style={{ height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
+          <img src={banners[bannerAtual].img} style={{ height: '85%' }} />
+
+        </Link>
+
+       
+
+        <button onClick={() => alternarBanner('next')} style={{
+
+          background: 'rgba(0, 0, 0, 0.3)', border: 'none', color: 'white',
+
+          fontSize: '30px', cursor: 'pointer', borderRadius: '50%', width: '45px', height: '45px'
+
+        }}>›</button>
+
+      </div>
+
+
+
+      {/* API */}
+
+      <div style={{
+
+        backgroundColor: 'white',
+
+        marginTop: '25px',
+
+        padding: '20px',
+
+        borderRadius: '20px',
+
+        textAlign: 'center',
+
+        boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+
+      }}>
+
+        <h3 style={{ marginBottom: '10px' }}>Dica do dia ✨</h3>
+
+        <p style={{ fontStyle: 'italic', color: '#555' }}>
+
+          {frase || "Carregando..."}
+
+        </p>
+
+      </div>
+
+
+
+      {/* COLEÇÕES */}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px' }}>
+
+        <Link href="/colecao-verao" style={{
+
+          background: 'linear-gradient(180deg, #987317, #cebb4b)',
+
+          width: '47%', height: '220px', borderRadius: '25px',
+
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+
+          textDecoration: 'none'
+
+        }}>
+
+          <img src="/sol-icon.png" style={{ width: '75px' }} />
+
+          <h3>Coleção Verão</h3>
+
+        </Link>
+
+
+
+        <Link href="/colecao-pascoa" style={{
+
+          background: 'linear-gradient(180deg, #8B4513, #FFC0CB)',
+
+          width: '47%', height: '220px', borderRadius: '25px',
+
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+
+          textDecoration: 'none'
+
+        }}>
+
+          <img src="/coelho-icon.png" style={{ width: '75px' }} />
+
+          <h3>Coleção Páscoa</h3>
+
+        </Link>
+
+      </div>
+
+    </div>
+
+  );
+
+}
