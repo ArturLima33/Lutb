@@ -21,161 +21,138 @@ export default function Home() {
   };
 
   useEffect(() => {
-    // Busca a frase do dia (Conselho)
-    fetch("https://api.adviceslip.com/advice")
-      .then(res => res.json())
-      .then(data => setFrase(data.slip.advice));
+    // Busca a frase do conselho
+    fetch("https://api.adviceslip.com/advice").then(res => res.json()).then(data => setFrase(data.slip.advice));
     
-    // Carregar Produtos e Categorias do Back4App
+    // Carrega dados do banco
     const carregarDados = async () => {
-      try {
-        const [resP, resC] = await Promise.all([
-          fetch("https://parseapi.back4app.com/classes/Produto", { headers }),
-          fetch("https://parseapi.back4app.com/classes/Categoria", { headers })
-        ]);
-        const dataP = await resP.json();
-        const dataC = await resC.json();
-        setProdutos(dataP.results || []);
-        setCategorias(dataC.results || []);
-      } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-      }
+      const [resP, resC] = await Promise.all([
+        fetch("https://parseapi.back4app.com/classes/Produto", { headers }),
+        fetch("https://parseapi.back4app.com/classes/Categoria", { headers })
+      ]);
+      const dataP = await resP.json();
+      const dataC = await resC.json();
+      setProdutos(dataP.results || []);
+      setCategorias(dataC.results || []);
     };
     carregarDados();
   }, []);
 
-  // FILTRO DO CARROSSEL: Pega produtos marcados como 'noCarrossel' no Admin
+  // FILTRO DO CARROSSEL (Pega o que você marcou no admin)
   const bannersDB = produtos.filter(p => p.noCarrossel).map(p => ({
     id: p.objectId,
-    cor: p.cor || "#987317",
+    cor: p.cor || "#E63946", 
     img: p.img,
     link: `/produto/${p.objectId}`
   }));
 
-  // Banners de segurança caso o banco esteja vazio
+  // Se não tiver nada no banco, mantém os seus originais para não ficar vazio
   const bannersExibicao = bannersDB.length > 0 ? bannersDB : [
-    { id: '1', cor: '#987317', img: '/colar-musgo.png', link: '#' },
-    { id: '2', cor: '#E63946', img: '/moranguito.png', link: '#' }
+    { id: '1', cor: '#E63946', img: '/colar-coracao.png', link: '#' } 
   ];
 
-  // FILTRO DAS COLEÇÕES: Mostra as marcadas com 'naHome' (Máximo 2)
   const colecoesHome = categorias.filter(c => c.naHome).slice(0, 2);
 
-  // Lógica do Carrossel Automático
+  // Troca automática de banner
   useEffect(() => {
     if (bannersExibicao.length > 1) {
       const intervalo = setInterval(() => {
         setBannerAtual(prev => (prev + 1) % bannersExibicao.length);
-      }, 3000);
+      }, 4000);
       return () => clearInterval(intervalo);
     }
   }, [bannersExibicao]);
 
-  // Lógica de Busca
-  useEffect(() => {
-    if (!busca.trim()) {
-      setSugestoes([]);
-      return;
-    }
-    const resultado = produtos.filter(p => 
-      p.nome.toLowerCase().includes(busca.toLowerCase())
-    );
-    setSugestoes(resultado);
-  }, [busca, produtos]);
-
   return (
-    <div style={{ padding: '20px', maxWidth: '500px', margin: '0 auto', fontFamily: 'serif' }}>
+    <main style={{ backgroundColor: '#7FB35D', minHeight: '100vh', padding: '20px' }}>
       
-      {/* BARRA DE BUSCA */}
-      <div ref={boxRef} style={{ marginBottom: "20px", position: "relative" }}>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <input 
-            type="text" 
-            placeholder="Buscar produto..." 
-            value={busca} 
-            onChange={(e) => { setBusca(e.target.value); setMostrarSugestoes(true); }} 
-            style={{ flex: 1, padding: "12px", borderRadius: "15px", border: "none", backgroundColor: "white", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }} 
-          />
-          <button 
-            onClick={() => router.push(`/busca?q=${busca}`)} 
-            style={{ padding: "10px 15px", borderRadius: "15px", border: "none", backgroundColor: "#2D2D2D", color: "white", cursor: "pointer" }}
-          >
-            Buscar
-          </button>
+      {/* LOGO SUPERIOR */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
+        <div style={{ backgroundColor: '#A3B899', borderRadius: '50%', width: '100px', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '4px solid #758A6B' }}>
+          <span style={{ color: 'white', fontWeight: 'bold', fontSize: '20px', fontFamily: 'serif' }}>LUT.B</span>
         </div>
-        {mostrarSugestoes && busca && sugestoes.length > 0 && (
-          <div style={{ position: "absolute", top: "50px", width: "100%", background: "white", borderRadius: "15px", zIndex: 100, boxShadow: "0 4px 15px rgba(0,0,0,0.1)" }}>
-            {sugestoes.map(p => (
-              <div key={p.objectId} onClick={() => router.push(`/produto/${p.objectId}`)} style={{ padding: "12px", borderBottom: "1px solid #eee", cursor: 'pointer' }}>
-                {p.nome}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* CARROSSEL DINÂMICO */}
-      <div style={{ 
-        background: bannersExibicao[bannerAtual].cor, 
-        height: '210px', 
-        borderRadius: '30px', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between', 
-        padding: '0 15px', 
-        position: 'relative',
-        transition: 'background 0.5s ease'
-      }}>
-        <button 
-          onClick={() => setBannerAtual(prev => (prev === 0 ? bannersExibicao.length - 1 : prev - 1))}
-          style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', fontSize: '24px', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer' }}
-        >‹</button>
-        
-        <Link href={bannersExibicao[bannerAtual].link} style={{ height: '80%', display: 'flex', alignItems: 'center' }}>
-          <img 
-            src={bannersExibicao[bannerAtual].img} 
-            alt="Destaque" 
-            style={{ maxHeight: '100%', objectFit: 'contain' }} 
-          />
-        </Link>
-
-        <button 
-          onClick={() => setBannerAtual(prev => (prev + 1) % bannersExibicao.length)}
-          style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', fontSize: '24px', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer' }}
-        >›</button>
+      {/* BUSCA */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '30px' }}>
+        <input 
+          type="text" 
+          placeholder="Buscar produto..." 
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          style={{ width: '300px', padding: '12px 20px', borderRadius: '15px', border: 'none', outline: 'none' }} 
+        />
+        <button style={{ backgroundColor: '#333', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '15px', cursor: 'pointer' }}>
+          Buscar
+        </button>
       </div>
 
-      {/* FRASE DO DIA */}
-      <div style={{ backgroundColor: 'white', marginTop: '25px', padding: '20px', borderRadius: '25px', textAlign: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
-        <h3 style={{ marginBottom: '8px', color: '#2D2D1A' }}>Dica do dia ✨</h3>
-        <p style={{ fontStyle: 'italic', color: '#666', fontSize: '14px', margin: 0 }}>{frase || "A carregar conselho..."}</p>
+      {/* CARROSSEL (EXATAMENTE COMO NO PRINT) */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
+        <div style={{ 
+          backgroundColor: bannersExibicao[bannerAtual].cor, 
+          width: '500px', 
+          height: '280px', 
+          borderRadius: '40px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          padding: '0 20px',
+          position: 'relative'
+        }}>
+          <button onClick={() => setBannerAtual(prev => (prev === 0 ? bannersExibicao.length - 1 : prev - 1))} style={setaStyle}>‹</button>
+          
+          <Link href={bannersExibicao[bannerAtual].link} style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <img src={bannersExibicao[bannerAtual].img} style={{ maxHeight: '200px', objectFit: 'contain' }} />
+          </Link>
+
+          <button onClick={() => setBannerAtual(prev => (prev + 1) % bannersExibicao.length)} style={setaStyle}>›</button>
+        </div>
       </div>
 
-      {/* COLEÇÕES FIXADAS (0 A 2) */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px', gap: '15px' }}>
+      {/* DICA DO DIA */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
+        <div style={{ backgroundColor: 'white', width: '500px', padding: '30px', borderRadius: '40px', textAlign: 'center' }}>
+          <h3 style={{ margin: '0 0 10px 0', fontFamily: 'serif', fontSize: '22px' }}>Dica do dia ✨</h3>
+          <p style={{ fontStyle: 'italic', color: '#555', margin: 0 }}>{frase || "Life is better when you sing about bananas."}</p>
+        </div>
+      </div>
+
+      {/* COLEÇÕES FIXADAS NA HOME */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
         {colecoesHome.map((cat) => (
-          <Link 
-            key={cat.objectId} 
-            href={`/colecao/${cat.nome.toLowerCase()}`} 
-            style={{ 
+          <Link key={cat.objectId} href={`/colecao/${cat.nome.toLowerCase()}`} style={{ textDecoration: 'none' }}>
+            <div style={{ 
               background: `linear-gradient(180deg, ${cat.cor1}, ${cat.cor2})`, 
-              width: '100%', 
-              height: '220px', 
-              borderRadius: '30px', 
+              width: '240px', 
+              height: '240px', 
+              borderRadius: '40px', 
               display: 'flex', 
               flexDirection: 'column', 
               alignItems: 'center', 
-              justifyContent: 'center', 
-              textDecoration: 'none',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.1)'
-            }}
-          >
-            <h3 style={{ color: 'white', fontSize: '20px', fontWeight: 'bold' }}>Coleção</h3>
-            <h2 style={{ color: 'white', fontSize: '24px', margin: 0 }}>{cat.nome}</h2>
+              justifyContent: 'center' 
+            }}>
+              <h3 style={{ color: 'white', margin: 0, fontSize: '20px' }}>Coleção</h3>
+              <h2 style={{ color: 'white', margin: 0, fontSize: '28px', textTransform: 'capitalize' }}>{cat.nome}</h2>
+            </div>
           </Link>
         ))}
       </div>
 
-    </div>
+    </main>
   );
 }
+
+const setaStyle = {
+  backgroundColor: 'rgba(255,255,255,0.4)',
+  border: 'none',
+  color: 'white',
+  width: '40px',
+  height: '40px',
+  borderRadius: '50%',
+  fontSize: '24px',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+};
