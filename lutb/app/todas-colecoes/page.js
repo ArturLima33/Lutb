@@ -1,13 +1,41 @@
 "use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function TodasColecoes() {
-  const produtos = [
-    { id: 3, nome: "Moranguito", cor: "#E63946", img: "/moranguito.png", desc: "Feito à mão com pedras míticas encontradas no topo do Evereste e benzidas por freiras beneditinas." },
-    { id: 4, nome: "Tesouro Tropical", cor: "#1E90FF", img: "/tesouro-tropical.png", desc: "Feito à mão com pérolas encontradas em um baú de pirata no fundo do mar, atualmente está livre de maldições." },
-    { id: 1, nome: "Colar Bolhas", cor: "#333", img: "/colar-bolhas.png", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque commodo velit vel dui eleifend auctor. Donec vel blandit tellus." },
-    { id: 2, nome: "Colar Musgo", cor: "#333", img: "/colar-musgo.png", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque commodo velit vel dui eleifend auctor. Donec vel blandit tellus." }
-  ];
+  const [produtos, setProdutos] = useState([]);
+
+  useEffect(() => {
+    const fetchProdutos = async () => {
+      const produtosFixos = [
+        { id: "3", nome: "Moranguito", cor: "#E63946", img: "/moranguito.png", desc: "Feito à mão com pedras míticas encontradas no topo do Evereste." },
+        { id: "4", nome: "Tesouro Tropical", cor: "#1E90FF", img: "/tesouro-tropical.png", desc: "Feito à mão com pérolas encontradas em um baú de pirata." },
+        { id: "1", nome: "Colar Bolhas", cor: "#333", img: "/colar-bolhas.png", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
+        { id: "2", nome: "Colar Musgo", cor: "#333", img: "/colar-musgo.png", desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." }
+      ];
+
+      try {
+        const res = await fetch("https://parseapi.back4app.com/classes/Produto", {
+          headers: {
+            "X-Parse-Application-Id": "YiHW7CkrLOQwTbVFzuSWCopoensMUgLXTzhiEROz",
+            "X-Parse-REST-API-Key": "OaBOq7zWF7Fc8GNcyprMmqu2m1LA75tGwvUDWm6a",
+          },
+        });
+        const data = await res.json();
+        const produtosAdmin = (data.results || []).map(p => ({
+          id: p.objectId,
+          nome: p.nome,
+          desc: p.desc,
+          cor: p.cor || "#333",
+          img: p.imagemUrl || "/placeholder.png"
+        }));
+        setProdutos([...produtosFixos, ...produtosAdmin]);
+      } catch (err) {
+        setProdutos(produtosFixos);
+      }
+    };
+    fetchProdutos();
+  }, []);
 
   return (
     <div style={{ padding: '0 20px 40px 20px' }}>
