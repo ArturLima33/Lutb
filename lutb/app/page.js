@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const [frase, setFrase] = useState("");
   const [busca, setBusca] = useState("");
-  const [sugestoes, setSugestoes] = useState([]);
-  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
   const [produtos, setProdutos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [banners, setBanners] = useState([]);
@@ -22,57 +20,61 @@ export default function Home() {
   };
 
   useEffect(() => {
+    // Frase da API
     fetch("https://api.adviceslip.com/advice").then(res => res.json()).then(data => setFrase(data.slip.advice));
     
+    // Carregar dados do Back4App
     const carregarDados = async () => {
-      const [resP, resC, resB] = await Promise.all([
-        fetch("https://parseapi.back4app.com/classes/Produto", { headers }),
-        fetch("https://parseapi.back4app.com/classes/Categoria", { headers }),
-        fetch("https://parseapi.back4app.com/classes/Carrossel", { headers })
-      ]);
-      const dataP = await resP.json(); setProdutos(dataP.results || []);
-      const dataC = await resC.json(); setCategorias(dataC.results || []);
-      const dataB = await resB.json(); setBanners(dataB.results || []);
+      try {
+        const [resP, resC, resB] = await Promise.all([
+          fetch("https://parseapi.back4app.com/classes/Produto", { headers }),
+          fetch("https://parseapi.back4app.com/classes/Categoria", { headers }),
+          fetch("https://parseapi.back4app.com/classes/Carrossel", { headers })
+        ]);
+        const dataP = await resP.json(); setProdutos(dataP.results || []);
+        const dataC = await resC.json(); setCategorias(dataC.results || []);
+        const dataB = await resB.json(); setBanners(dataB.results || []);
+      } catch (e) { console.error(e); }
     };
     carregarDados();
   }, []);
 
-  // Banners Dinâmicos (Se não houver no banco, usa os originais)
-  const bannersHome = banners.length > 0 ? banners : [
-    { id: 1, cor: 'linear-gradient(135deg, #FF8C00, #D2691E)', img: '/colar-musgo.png', link: '#' }
+  // Lógica dos Banners: Se o banco estiver vazio, usa os seus padrões para não sumir nada
+  const bannersParaExibir = banners.length > 0 ? banners : [
+    { id: 'fixo1', cor: 'linear-gradient(135deg, #FF8C00, #D2691E)', img: '/colar-musgo.png', link: '#' },
+    { id: 'fixo2', cor: 'linear-gradient(135deg, #FF4500, #8B0000)', img: '/moranguito.png', link: '#' }
   ];
-
-  // Coleções Fixas (0 a 2)
-  const colecoesHome = categorias.filter(c => c.naHome).slice(0, 2);
 
   useEffect(() => {
     const intervalo = setInterval(() => {
-      setBannerAtual(prev => (prev + 1) % bannersHome.length);
+      setBannerAtual(prev => (prev + 1) % bannersParaExibir.length);
     }, 3000);
     return () => clearInterval(intervalo);
-  }, [bannersHome]);
+  }, [bannersParaExibir]);
+
+  // Coleções fixadas (máximo 2 na home)
+  const colecoesHome = categorias.filter(c => c.naHome).slice(0, 2);
 
   return (
     <div style={{ padding: '20px' }}>
-      {/* BUSCA (Mantida Original) */}
+      {/* BUSCA */}
       <div ref={boxRef} style={{ marginBottom: "20px", position: "relative" }}>
         <div style={{ display: "flex", gap: "10px" }}>
-          <input type="text" placeholder="Buscar produto..." value={busca} onChange={(e) => { setBusca(e.target.value); setMostrarSugestoes(true); }} style={{ flex: 1, padding: "10px", borderRadius: "10px", border: "none" }} />
-          <button onClick={() => router.push(`/busca?q=${busca}`)} style={{ padding: "10px 15px", borderRadius: "10px", backgroundColor: "#2D2D2D", color: "white", border: 'none' }}>Buscar</button>
+          <input type="text" placeholder="Buscar produto..." value={busca} onChange={(e) => setBusca(e.target.value)} style={{ flex: 1, padding: "10px", borderRadius: "10px", border: "none" }} />
+          <button onClick={() => router.push(`/busca?q=${busca}`)} style={{ padding: "10px 15px", borderRadius: "10px", border: "none", backgroundColor: "#2D2D2D", color: "white" }}>Buscar</button>
         </div>
-        {/* Sugestões omitidas para brevidade, mas o funcionamento é o mesmo */}
       </div>
 
-      {/* CARROSSEL ORIGINAL */}
+      {/* CARROSSEL (ESTRUTURA ORIGINAL PRESERVADA) */}
       <div style={{
-        background: bannersHome[bannerAtual].cor,
+        background: bannersParaExibir[bannerAtual].cor,
         height: '210px', borderRadius: '25px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px', position: 'relative', boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
       }}>
-        <button onClick={() => setBannerAtual(prev => (prev === 0 ? bannersHome.length - 1 : prev - 1))} style={{ background: 'rgba(0, 0, 0, 0.3)', border: 'none', color: 'white', borderRadius: '50%', width: '40px', height: '40px' }}>‹</button>
-        <Link href={bannersHome[bannerAtual].link} style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-          <img src={bannersHome[bannerAtual].img} style={{ height: '170px' }} />
+        <button onClick={() => setBannerAtual(prev => (prev === 0 ? bannersParaExibir.length - 1 : prev - 1))} style={btnSeta}>‹</button>
+        <Link href={bannersParaExibir[bannerAtual].link || "#"} style={{ height: '100%', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <img src={bannersParaExibir[bannerAtual].img} style={{ height: '85%' }} alt="Banner" />
         </Link>
-        <button onClick={() => setBannerAtual(prev => (prev + 1) % bannersHome.length)} style={{ background: 'rgba(0, 0, 0, 0.3)', border: 'none', color: 'white', borderRadius: '50%', width: '40px', height: '40px' }}>›</button>
+        <button onClick={() => setBannerAtual(prev => (prev + 1) % bannersParaExibir.length)} style={btnSeta}>›</button>
       </div>
 
       {/* DICA DO DIA */}
@@ -81,17 +83,19 @@ export default function Home() {
         <p style={{ fontStyle: 'italic', color: '#555' }}>{frase || "Carregando..."}</p>
       </div>
 
-      {/* COLEÇÕES DINÂMICAS NA HOME (MÁXIMO 2) */}
+      {/* COLEÇÕES (DINÂMICAS) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px' }}>
-        {colecoesHome.map(cat => (
+        {colecoesHome.map((cat) => (
           <Link key={cat.objectId} href={`/colecao/${cat.nome.toLowerCase()}`} style={{
-            background: `linear-gradient(180deg, ${cat.cor1}, ${cat.cor2})`,
+            background: `linear-gradient(180deg, ${cat.cor1 || '#987317'}, ${cat.cor2 || '#cebb4b'})`,
             width: '47%', height: '220px', borderRadius: '25px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textDecoration: 'none'
           }}>
-             <h3 style={{ color: 'white' }}>{cat.nome}</h3>
+            <h3 style={{ color: 'white' }}>{cat.nome}</h3>
           </Link>
         ))}
       </div>
     </div>
   );
 }
+
+const btnSeta = { background: 'rgba(0, 0, 0, 0.3)', border: 'none', color: 'white', fontSize: '30px', cursor: 'pointer', borderRadius: '50%', width: '45px', height: '45px' };
