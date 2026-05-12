@@ -2,13 +2,15 @@
 import { useState, useEffect } from "react";
 
 export default function Admin() {
-  const [produtos, setProdutos] = useState([]);
-  const [categorias, setCategorias] = useState([]);
-  const [nomeProd, setNomeProd] = useState("");
-  const [catSelecionada, setCatSelecionada] = useState("");
+  const [nome, setNome] = useState("");
+  const [preco, setPreco] = useState("");
+  const [desc, setDesc] = useState("");
+  const [img, setImg] = useState("");
+  const [cor, setCor] = useState("#333");
+  const [categoria, setCategoria] = useState("");
   const [noCarrossel, setNoCarrossel] = useState(false);
-  const [nomeCat, setNomeCat] = useState("");
-  const [exibirHome, setExibirHome] = useState(false);
+  const [produtos, setProdutos] = useState([]);
+  const [editandoId, setEditandoId] = useState(null);
 
   const headers = {
     "X-Parse-Application-Id": "YiHW7CkrLOQwTbVFzuSWCopoensMUgLXTzhiEROz",
@@ -17,86 +19,58 @@ export default function Admin() {
   };
 
   useEffect(() => {
-    atualizarDados();
+    carregarProdutos();
   }, []);
 
-  const atualizarDados = () => {
-    fetch("https://parseapi.back4app.com/classes/Produto", { headers })
-      .then(res => res.json()).then(data => setProdutos(data.results || []));
-    fetch("https://parseapi.back4app.com/classes/Categoria", { headers })
-      .then(res => res.json()).then(data => setCategorias(data.results || []));
+  const carregarProdutos = async () => {
+    const res = await fetch("https://parseapi.back4app.com/classes/Produto", { headers });
+    const data = await res.json();
+    setProdutos(data.results || []);
   };
 
-  const criarCategoria = async () => {
-    await fetch("https://parseapi.back4app.com/classes/Categoria", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ nome: nomeCat, exibirNaHome: exibirHome })
-    });
-    setNomeCat("");
-    atualizarDados();
+  const salvarProduto = async () => {
+    if (!nome.trim()) return alert("Nome é obrigatório!");
+    const dados = { nome, preco, desc, img, cor, categoria, noCarrossel };
+    
+    const url = editandoId ? `https://parseapi.back4app.com/classes/Produto/${editandoId}` : "https://parseapi.back4app.com/classes/Produto";
+    const method = editandoId ? "PUT" : "POST";
+
+    await fetch(url, { method, headers, body: JSON.stringify(dados) });
+    
+    setNome(""); setPreco(""); setDesc(""); setImg(""); setCor("#333"); setCategoria(""); setNoCarrossel(false); setEditandoId(null);
+    carregarProdutos();
   };
 
-  const deletarCategoria = async (id) => {
-    await fetch(`https://parseapi.back4app.com/classes/Categoria/${id}`, { method: "DELETE", headers });
-    atualizarDados();
-  };
-
-  const criarProduto = async () => {
-    await fetch("https://parseapi.back4app.com/classes/Produto", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ 
-        nome: nomeProd, 
-        categoriaId: catSelecionada, 
-        fixarNoCarrossel: noCarrossel 
-      })
-    });
-    setNomeProd("");
-    atualizarDados();
-  };
-
-  const deletarProduto = async (id) => {
+  const removerProduto = async (id) => {
     await fetch(`https://parseapi.back4app.com/classes/Produto/${id}`, { method: "DELETE", headers });
-    atualizarDados();
+    carregarProdutos();
   };
 
   return (
-    <div style={{ padding: "20px", color: "#333" }}>
-      <h1>Gerenciar Loja</h1>
-
-      <section style={{ background: "#eee", padding: "15px", borderRadius: "10px", marginBottom: "20px" }}>
-        <h3>Nova Categoria / Coleção</h3>
-        <input placeholder="Nome da Coleção" value={nomeCat} onChange={e => setNomeCat(e.target.value)} />
+    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+      <h2>Painel de Controle</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '40px' }}>
+        <input placeholder="Nome" value={nome} onChange={e => setNome(e.target.value)} />
+        <input placeholder="Descrição" value={desc} onChange={e => setDesc(e.target.value)} />
+        <input placeholder="URL Imagem" value={img} onChange={e => setImg(e.target.value)} />
+        <input placeholder="Cor (Hex)" value={cor} onChange={e => setCor(e.target.value)} />
+        <input placeholder="Categoria (ex: verao)" value={categoria} onChange={e => setCategoria(e.target.value)} />
         <label>
-          <input type="checkbox" checked={exibirHome} onChange={e => setExibirHome(e.target.checked)} /> 
-          Mostrar na Home?
+          <input type="checkbox" checked={noCarrossel} onChange={e => setNoCarrossel(e.target.checked)} /> Exibir no Carrossel da Home
         </label>
-        <button onClick={criarCategoria}>Criar Coleção</button>
-      </section>
+        <button onClick={salvarProduto} style={{ padding: '10px', background: '#2D2D2D', color: 'white' }}>
+          {editandoId ? "Atualizar" : "Criar Produto"}
+        </button>
+      </div>
 
-      <section style={{ background: "#eee", padding: "15px", borderRadius: "10px" }}>
-        <h3>Novo Produto</h3>
-        <input placeholder="Nome do Produto" value={nomeProd} onChange={e => setNomeProd(e.target.value)} />
-        <select value={catSelecionada} onChange={e => setCatSelecionada(e.target.value)}>
-          <option value="">Selecionar Coleção</option>
-          {categorias.map(c => <option key={c.objectId} value={c.objectId}>{c.nome}</option>)}
-        </select>
-        <label>
-          <input type="checkbox" checked={noCarrossel} onChange={e => setNoCarrossel(e.target.checked)} /> 
-          Destacar no Carrossel?
-        </label>
-        <button onClick={criarProduto}>Salvar Produto</button>
-      </section>
-
-      <h3>Categorias Ativas</h3>
-      {categorias.map(c => (
-        <div key={c.objectId}>{c.nome} <button onClick={() => deletarCategoria(c.objectId)}>x</button></div>
-      ))}
-
-      <h3>Produtos Ativos</h3>
       {produtos.map(p => (
-        <div key={p.objectId}>{p.nome} <button onClick={() => deletarProduto(p.objectId)}>x</button></div>
+        <div key={p.objectId} style={{ borderBottom: '1px solid #eee', padding: '10px', display: 'flex', justifyContent: 'space-between' }}>
+          <span>{p.nome}</span>
+          <div>
+            <button onClick={() => { setEditandoId(p.objectId); setNome(p.nome); setDesc(p.desc); setImg(p.img); setCor(p.cor); setCategoria(p.categoria); setNoCarrossel(p.noCarrossel); }}>Editar</button>
+            <button onClick={() => removerProduto(p.objectId)} style={{ color: 'red' }}>Excluir</button>
+          </div>
+        </div>
       ))}
     </div>
   );
