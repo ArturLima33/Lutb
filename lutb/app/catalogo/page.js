@@ -164,7 +164,7 @@ export default function Catalogo() {
                 fontWeight: 'bold', 
                 color: '#2D2D1A' 
               }}>
-                {p.preco ? `R$ ${p.preco}` : "Preço indisponível"}
+                {p.preco ? `R$ ${p.preco}` : "Preço indisponível ☺"}
               </p>
             </div>
           </Link>
