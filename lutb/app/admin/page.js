@@ -26,12 +26,14 @@ export default function Admin() {
   }, []);
 
   const carregarProdutos = async () => {
+
     const res = await fetch(
       "https://parseapi.back4app.com/classes/Produto",
       { headers }
     );
 
     const data = await res.json();
+
     setProdutos(data.results || []);
   };
 
@@ -104,7 +106,7 @@ export default function Admin() {
   };
 
   // =========================================
-  // CATEGORIAS (LOCAL STORAGE)
+  // CATEGORIAS
   // =========================================
 
   const [categorias, setCategorias] = useState([]);
@@ -116,7 +118,9 @@ export default function Admin() {
     const salvas = localStorage.getItem("categorias");
 
     if (salvas) {
+
       setCategorias(JSON.parse(salvas));
+
     } else {
 
       const iniciais = [
@@ -193,7 +197,7 @@ export default function Admin() {
   };
 
   // =========================================
-  // COLEÇÕES (LOCAL STORAGE)
+  // COLEÇÕES
   // =========================================
 
   const [colecoes, setColecoes] = useState([]);
@@ -284,16 +288,61 @@ export default function Admin() {
   };
 
   // =========================================
-  // BANNERS / CARROSSEL (LOCAL STORAGE)
+  // CARROSSEL
   // =========================================
+
+  const produtosFixos = [
+    {
+      id: "2",
+      nome: "Colar Musgo",
+      img: "/colar-musgo.png"
+    },
+    {
+      id: "3",
+      nome: "Moranguito",
+      img: "/moranguito.png"
+    }
+  ];
+
+  const [todosProdutos, setTodosProdutos] = useState([]);
 
   const [banners, setBanners] = useState([]);
 
-  const [imgBanner, setImgBanner] = useState("");
-  const [linkBanner, setLinkBanner] = useState("");
-  const [corBanner, setCorBanner] = useState("");
+  const [buscaBanner, setBuscaBanner] = useState("");
+  const [sugestoesBanner, setSugestoesBanner] = useState([]);
+
+  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
+
+  const [corBanner, setCorBanner] = useState("#FF8C00");
 
   const [editandoBanner, setEditandoBanner] = useState(null);
+
+  useEffect(() => {
+
+    const carregarProdutosBanner = async () => {
+
+      const res = await fetch(
+        "https://parseapi.back4app.com/classes/Produto",
+        { headers }
+      );
+
+      const data = await res.json();
+
+      const dinamicos = (data.results || []).map(p => ({
+        id: p.objectId,
+        nome: p.nome,
+        img: p.img || "/logo(lutb).png"
+      }));
+
+      setTodosProdutos([
+        ...produtosFixos,
+        ...dinamicos
+      ]);
+    };
+
+    carregarProdutosBanner();
+
+  }, []);
 
   useEffect(() => {
 
@@ -308,9 +357,17 @@ export default function Admin() {
       const iniciais = [
         {
           id: 1,
+          produtoId: "2",
+          nome: "Colar Musgo",
           img: "/colar-musgo.png",
-          link: "/produto/2",
-          cor: "#FF8C00"
+          cor: "linear-gradient(135deg, #FF8C00, #D2691E)"
+        },
+        {
+          id: 2,
+          produtoId: "3",
+          nome: "Moranguito",
+          img: "/moranguito.png",
+          cor: "linear-gradient(135deg, #FF4500, #8B0000)"
         }
       ];
 
@@ -324,21 +381,48 @@ export default function Admin() {
 
   }, []);
 
-  const salvarBanner = () => {
+  useEffect(() => {
 
-    if (!imgBanner.trim()) {
-      alert("Imagem obrigatória!");
+    if (!buscaBanner.trim()) {
+      setSugestoesBanner([]);
       return;
     }
 
-    let novosBanners = [];
+    const termo = buscaBanner.toLowerCase();
+
+    const resultado = todosProdutos.filter(p =>
+      p.nome.toLowerCase().includes(termo)
+    );
+
+    setSugestoesBanner(resultado);
+
+  }, [buscaBanner, todosProdutos]);
+
+  const selecionarProduto = (produto) => {
+
+    setProdutoSelecionado(produto);
+
+    setBuscaBanner(produto.nome);
+
+    setSugestoesBanner([]);
+  };
+
+  const salvarBanner = () => {
+
+    if (!produtoSelecionado) {
+      alert("Selecione um produto válido!");
+      return;
+    }
 
     const banner = {
       id: editandoBanner || Date.now(),
-      img: imgBanner,
-      link: linkBanner || "/",
-      cor: corBanner || "#333"
+      produtoId: produtoSelecionado.id,
+      nome: produtoSelecionado.nome,
+      img: produtoSelecionado.img,
+      cor: corBanner
     };
+
+    let novosBanners = [];
 
     if (editandoBanner) {
 
@@ -365,15 +449,24 @@ export default function Admin() {
       JSON.stringify(novosBanners)
     );
 
-    setImgBanner("");
-    setLinkBanner("");
-    setCorBanner("");
+    setBuscaBanner("");
+    setProdutoSelecionado(null);
+
+    setCorBanner("#FF8C00");
   };
 
   const editarBanner = (banner) => {
-    setImgBanner(banner.img);
-    setLinkBanner(banner.link);
+
+    setProdutoSelecionado({
+      id: banner.produtoId,
+      nome: banner.nome,
+      img: banner.img
+    });
+
+    setBuscaBanner(banner.nome);
+
     setCorBanner(banner.cor);
+
     setEditandoBanner(banner.id);
   };
 
@@ -574,31 +667,77 @@ export default function Admin() {
         ))}
       </div>
 
-      {/* BANNERS */}
+      {/* CARROSSEL */}
 
       <div style={boxStyle}>
 
         <h2>Carrossel</h2>
 
-        <input
-          placeholder="Imagem do banner"
-          value={imgBanner}
-          onChange={(e) => setImgBanner(e.target.value)}
-          style={inputStyle}
-        />
+        <div style={{ position: "relative" }}>
+
+          <input
+            placeholder="Digite o nome do produto"
+            value={buscaBanner}
+            onChange={(e) => {
+              setBuscaBanner(e.target.value);
+              setProdutoSelecionado(null);
+            }}
+            style={inputStyle}
+          />
+
+          {sugestoesBanner.length > 0 && (
+            <div style={{
+              background: "white",
+              border: "1px solid #ccc",
+              borderRadius: "10px",
+              marginTop: "-5px",
+              marginBottom: "10px",
+              overflow: "hidden"
+            }}>
+              {sugestoesBanner.map((p) => (
+                <div
+                  key={p.id}
+                  onClick={() => selecionarProduto(p)}
+                  style={{
+                    padding: "10px",
+                    cursor: "pointer",
+                    borderBottom: "1px solid #eee"
+                  }}
+                >
+                  {p.nome}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <p style={{
+          fontSize: "13px",
+          color: produtoSelecionado
+            ? "green"
+            : "red"
+        }}>
+          {produtoSelecionado
+            ? "Produto válido selecionado ✔"
+            : "Selecione um produto existente"}
+        </p>
+
+        <label>
+          Cor do banner
+        </label>
 
         <input
-          placeholder="Link do produto"
-          value={linkBanner}
-          onChange={(e) => setLinkBanner(e.target.value)}
-          style={inputStyle}
-        />
-
-        <input
-          placeholder="Cor do fundo"
+          type="color"
           value={corBanner}
           onChange={(e) => setCorBanner(e.target.value)}
-          style={inputStyle}
+          style={{
+            width: "100%",
+            height: "50px",
+            border: "none",
+            marginTop: "10px",
+            marginBottom: "15px",
+            cursor: "pointer"
+          }}
         />
 
         <button
@@ -613,15 +752,31 @@ export default function Admin() {
         {banners.map((b) => (
           <div key={b.id} style={cardStyle}>
 
-            <div>
-              <strong>{b.link}</strong>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px"
+            }}>
+              <img
+                src={b.img}
+                style={{
+                  width: "50px",
+                  height: "50px",
+                  objectFit: "contain"
+                }}
+              />
 
-              <p style={{
-                margin: 0,
-                fontSize: "12px"
-              }}>
-                {b.cor}
-              </p>
+              <div>
+                <strong>{b.nome}</strong>
+
+                <div style={{
+                  width: "30px",
+                  height: "15px",
+                  background: b.cor,
+                  borderRadius: "5px",
+                  marginTop: "5px"
+                }}></div>
+              </div>
             </div>
 
             <div style={{
