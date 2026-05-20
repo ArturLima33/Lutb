@@ -106,192 +106,15 @@ export default function Admin() {
   };
 
   // =========================================
-  // CATEGORIAS
-  // =========================================
-
-  const [categorias, setCategorias] = useState([]);
-  const [nomeCategoria, setNomeCategoria] = useState("");
-  const [editandoCategoria, setEditandoCategoria] = useState(null);
-
-  useEffect(() => {
-
-    const salvas = localStorage.getItem("categorias");
-
-    if (salvas) {
-
-      setCategorias(JSON.parse(salvas));
-
-    } else {
-
-      const iniciais = [
-        { id: 1, nome: "Roupas" },
-        { id: 2, nome: "Acessórios" }
-      ];
-
-      setCategorias(iniciais);
-
-      localStorage.setItem(
-        "categorias",
-        JSON.stringify(iniciais)
-      );
-    }
-
-  }, []);
-
-  const salvarCategoria = () => {
-
-    if (!nomeCategoria.trim()) {
-      alert("Digite o nome da categoria!");
-      return;
-    }
-
-    let novasCategorias = [];
-
-    if (editandoCategoria) {
-
-      novasCategorias = categorias.map(c =>
-        c.id === editandoCategoria
-          ? { ...c, nome: nomeCategoria }
-          : c
-      );
-
-      setEditandoCategoria(null);
-
-    } else {
-
-      novasCategorias = [
-        ...categorias,
-        {
-          id: Date.now(),
-          nome: nomeCategoria
-        }
-      ];
-    }
-
-    setCategorias(novasCategorias);
-
-    localStorage.setItem(
-      "categorias",
-      JSON.stringify(novasCategorias)
-    );
-
-    setNomeCategoria("");
-  };
-
-  const editarCategoria = (categoria) => {
-    setNomeCategoria(categoria.nome);
-    setEditandoCategoria(categoria.id);
-  };
-
-  const removerCategoria = (id) => {
-
-    const novasCategorias =
-      categorias.filter(c => c.id !== id);
-
-    setCategorias(novasCategorias);
-
-    localStorage.setItem(
-      "categorias",
-      JSON.stringify(novasCategorias)
-    );
-  };
-
-  // =========================================
-  // COLEÇÕES
-  // =========================================
-
-  const [colecoes, setColecoes] = useState([]);
-  const [nomeColecao, setNomeColecao] = useState("");
-  const [editandoColecao, setEditandoColecao] = useState(null);
-
-  useEffect(() => {
-
-    const salvas = localStorage.getItem("colecoes");
-
-    if (salvas) {
-
-      setColecoes(JSON.parse(salvas));
-
-    } else {
-
-      const iniciais = [
-        { id: 1, nome: "Coleção Verão" },
-        { id: 2, nome: "Coleção Páscoa" }
-      ];
-
-      setColecoes(iniciais);
-
-      localStorage.setItem(
-        "colecoes",
-        JSON.stringify(iniciais)
-      );
-    }
-
-  }, []);
-
-  const salvarColecao = () => {
-
-    if (!nomeColecao.trim()) {
-      alert("Digite o nome da coleção!");
-      return;
-    }
-
-    let novasColecoes = [];
-
-    if (editandoColecao) {
-
-      novasColecoes = colecoes.map(c =>
-        c.id === editandoColecao
-          ? { ...c, nome: nomeColecao }
-          : c
-      );
-
-      setEditandoColecao(null);
-
-    } else {
-
-      novasColecoes = [
-        ...colecoes,
-        {
-          id: Date.now(),
-          nome: nomeColecao
-        }
-      ];
-    }
-
-    setColecoes(novasColecoes);
-
-    localStorage.setItem(
-      "colecoes",
-      JSON.stringify(novasColecoes)
-    );
-
-    setNomeColecao("");
-  };
-
-  const editarColecao = (colecao) => {
-    setNomeColecao(colecao.nome);
-    setEditandoColecao(colecao.id);
-  };
-
-  const removerColecao = (id) => {
-
-    const novasColecoes =
-      colecoes.filter(c => c.id !== id);
-
-    setColecoes(novasColecoes);
-
-    localStorage.setItem(
-      "colecoes",
-      JSON.stringify(novasColecoes)
-    );
-  };
-
-  // =========================================
-  // CARROSSEL
+  // PRODUTOS PARA CATEGORIAS/COLEÇÕES/BANNERS
   // =========================================
 
   const produtosFixos = [
+    {
+      id: "1",
+      nome: "Colar Bolhas",
+      img: "/colar-bolhas.png"
+    },
     {
       id: "2",
       nome: "Colar Musgo",
@@ -301,25 +124,19 @@ export default function Admin() {
       id: "3",
       nome: "Moranguito",
       img: "/moranguito.png"
+    },
+    {
+      id: "4",
+      nome: "Tesouro Tropical",
+      img: "/tesouro-tropical.png"
     }
   ];
 
   const [todosProdutos, setTodosProdutos] = useState([]);
 
-  const [banners, setBanners] = useState([]);
-
-  const [buscaBanner, setBuscaBanner] = useState("");
-  const [sugestoesBanner, setSugestoesBanner] = useState([]);
-
-  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
-
-  const [corBanner, setCorBanner] = useState("#FF8C00");
-
-  const [editandoBanner, setEditandoBanner] = useState(null);
-
   useEffect(() => {
 
-    const carregarProdutosBanner = async () => {
+    const carregarProdutosExtras = async () => {
 
       const res = await fetch(
         "https://parseapi.back4app.com/classes/Produto",
@@ -340,9 +157,396 @@ export default function Admin() {
       ]);
     };
 
-    carregarProdutosBanner();
+    carregarProdutosExtras();
 
   }, []);
+
+  // =========================================
+  // CATEGORIAS
+  // =========================================
+
+  const [categorias, setCategorias] = useState([]);
+  const [nomeCategoria, setNomeCategoria] = useState("");
+  const [editandoCategoria, setEditandoCategoria] = useState(null);
+
+  const [buscaCategoria, setBuscaCategoria] = useState("");
+  const [sugestoesCategoria, setSugestoesCategoria] = useState([]);
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState(null);
+
+  useEffect(() => {
+
+    const salvas = localStorage.getItem("categorias");
+
+    if (salvas) {
+
+      setCategorias(JSON.parse(salvas));
+
+    } else {
+
+      const iniciais = [
+        {
+          id: 1,
+          nome: "Roupas",
+          produtos: []
+        },
+        {
+          id: 2,
+          nome: "Acessórios",
+          produtos: []
+        }
+      ];
+
+      setCategorias(iniciais);
+
+      localStorage.setItem(
+        "categorias",
+        JSON.stringify(iniciais)
+      );
+    }
+
+  }, []);
+
+  useEffect(() => {
+
+    if (!buscaCategoria.trim()) {
+      setSugestoesCategoria([]);
+      return;
+    }
+
+    const termo = buscaCategoria.toLowerCase();
+
+    const resultado = todosProdutos.filter(p =>
+      p.nome.toLowerCase().includes(termo)
+    );
+
+    setSugestoesCategoria(resultado);
+
+  }, [buscaCategoria, todosProdutos]);
+
+  const salvarCategoria = () => {
+
+    if (!nomeCategoria.trim()) {
+      alert("Digite o nome da categoria!");
+      return;
+    }
+
+    let novasCategorias = [];
+
+    if (editandoCategoria) {
+
+      novasCategorias = categorias.map(c =>
+        c.id === editandoCategoria
+          ? {
+              ...c,
+              nome: nomeCategoria
+            }
+          : c
+      );
+
+      setEditandoCategoria(null);
+
+    } else {
+
+      novasCategorias = [
+        ...categorias,
+        {
+          id: Date.now(),
+          nome: nomeCategoria,
+          produtos: []
+        }
+      ];
+    }
+
+    setCategorias(novasCategorias);
+
+    localStorage.setItem(
+      "categorias",
+      JSON.stringify(novasCategorias)
+    );
+
+    setNomeCategoria("");
+  };
+
+  const editarCategoria = (categoria) => {
+
+    setNomeCategoria(categoria.nome);
+
+    setEditandoCategoria(categoria.id);
+  };
+
+  const removerCategoria = (id) => {
+
+    const novasCategorias =
+      categorias.filter(c => c.id !== id);
+
+    setCategorias(novasCategorias);
+
+    localStorage.setItem(
+      "categorias",
+      JSON.stringify(novasCategorias)
+    );
+  };
+
+  const adicionarProdutoCategoria = (
+    categoriaId,
+    produto
+  ) => {
+
+    const novasCategorias = categorias.map(c => {
+
+      if (c.id !== categoriaId) return c;
+
+      const jaExiste =
+        c.produtos?.some(
+          p => p.id === produto.id
+        );
+
+      if (jaExiste) return c;
+
+      return {
+        ...c,
+        produtos: [
+          ...(c.produtos || []),
+          produto
+        ]
+      };
+    });
+
+    setCategorias(novasCategorias);
+
+    localStorage.setItem(
+      "categorias",
+      JSON.stringify(novasCategorias)
+    );
+
+    setBuscaCategoria("");
+  };
+
+  const removerProdutoCategoria = (
+    categoriaId,
+    produtoId
+  ) => {
+
+    const novasCategorias = categorias.map(c => {
+
+      if (c.id !== categoriaId) return c;
+
+      return {
+        ...c,
+        produtos: c.produtos.filter(
+          p => p.id !== produtoId
+        )
+      };
+    });
+
+    setCategorias(novasCategorias);
+
+    localStorage.setItem(
+      "categorias",
+      JSON.stringify(novasCategorias)
+    );
+  };
+
+  // =========================================
+  // COLEÇÕES
+  // =========================================
+
+  const [colecoes, setColecoes] = useState([]);
+  const [nomeColecao, setNomeColecao] = useState("");
+  const [editandoColecao, setEditandoColecao] = useState(null);
+
+  const [buscaColecao, setBuscaColecao] = useState("");
+  const [sugestoesColecao, setSugestoesColecao] = useState([]);
+  const [colecaoSelecionada, setColecaoSelecionada] = useState(null);
+
+  useEffect(() => {
+
+    const salvas = localStorage.getItem("colecoes");
+
+    if (salvas) {
+
+      setColecoes(JSON.parse(salvas));
+
+    } else {
+
+      const iniciais = [
+        {
+          id: 1,
+          nome: "Coleção Verão",
+          produtos: []
+        },
+        {
+          id: 2,
+          nome: "Coleção Páscoa",
+          produtos: []
+        }
+      ];
+
+      setColecoes(iniciais);
+
+      localStorage.setItem(
+        "colecoes",
+        JSON.stringify(iniciais)
+      );
+    }
+
+  }, []);
+
+  useEffect(() => {
+
+    if (!buscaColecao.trim()) {
+      setSugestoesColecao([]);
+      return;
+    }
+
+    const termo = buscaColecao.toLowerCase();
+
+    const resultado = todosProdutos.filter(p =>
+      p.nome.toLowerCase().includes(termo)
+    );
+
+    setSugestoesColecao(resultado);
+
+  }, [buscaColecao, todosProdutos]);
+
+  const salvarColecao = () => {
+
+    if (!nomeColecao.trim()) {
+      alert("Digite o nome da coleção!");
+      return;
+    }
+
+    let novasColecoes = [];
+
+    if (editandoColecao) {
+
+      novasColecoes = colecoes.map(c =>
+        c.id === editandoColecao
+          ? {
+              ...c,
+              nome: nomeColecao
+            }
+          : c
+      );
+
+      setEditandoColecao(null);
+
+    } else {
+
+      novasColecoes = [
+        ...colecoes,
+        {
+          id: Date.now(),
+          nome: nomeColecao,
+          produtos: []
+        }
+      ];
+    }
+
+    setColecoes(novasColecoes);
+
+    localStorage.setItem(
+      "colecoes",
+      JSON.stringify(novasColecoes)
+    );
+
+    setNomeColecao("");
+  };
+
+  const editarColecao = (colecao) => {
+
+    setNomeColecao(colecao.nome);
+
+    setEditandoColecao(colecao.id);
+  };
+
+  const removerColecao = (id) => {
+
+    const novasColecoes =
+      colecoes.filter(c => c.id !== id);
+
+    setColecoes(novasColecoes);
+
+    localStorage.setItem(
+      "colecoes",
+      JSON.stringify(novasColecoes)
+    );
+  };
+
+  const adicionarProdutoColecao = (
+    colecaoId,
+    produto
+  ) => {
+
+    const novasColecoes = colecoes.map(c => {
+
+      if (c.id !== colecaoId) return c;
+
+      const jaExiste =
+        c.produtos?.some(
+          p => p.id === produto.id
+        );
+
+      if (jaExiste) return c;
+
+      return {
+        ...c,
+        produtos: [
+          ...(c.produtos || []),
+          produto
+        ]
+      };
+    });
+
+    setColecoes(novasColecoes);
+
+    localStorage.setItem(
+      "colecoes",
+      JSON.stringify(novasColecoes)
+    );
+
+    setBuscaColecao("");
+  };
+
+  const removerProdutoColecao = (
+    colecaoId,
+    produtoId
+  ) => {
+
+    const novasColecoes = colecoes.map(c => {
+
+      if (c.id !== colecaoId) return c;
+
+      return {
+        ...c,
+        produtos: c.produtos.filter(
+          p => p.id !== produtoId
+        )
+      };
+    });
+
+    setColecoes(novasColecoes);
+
+    localStorage.setItem(
+      "colecoes",
+      JSON.stringify(novasColecoes)
+    );
+  };
+
+  // =========================================
+  // CARROSSEL
+  // =========================================
+
+  const [banners, setBanners] = useState([]);
+
+  const [buscaBanner, setBuscaBanner] = useState("");
+  const [sugestoesBanner, setSugestoesBanner] = useState([]);
+
+  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
+
+  const [corBanner, setCorBanner] = useState("#FF8C00");
+
+  const [editandoBanner, setEditandoBanner] = useState(null);
 
   useEffect(() => {
 
@@ -360,14 +564,14 @@ export default function Admin() {
           produtoId: "2",
           nome: "Colar Musgo",
           img: "/colar-musgo.png",
-          cor: "linear-gradient(135deg, #FF8C00, #D2691E)"
+          cor: "#FF8C00"
         },
         {
           id: 2,
           produtoId: "3",
           nome: "Moranguito",
           img: "/moranguito.png",
-          cor: "linear-gradient(135deg, #FF4500, #8B0000)"
+          cor: "#FF4500"
         }
       ];
 
@@ -602,14 +806,103 @@ export default function Admin() {
         </button>
 
         {categorias.map((c) => (
-          <div key={c.id} style={cardStyle}>
 
-            <strong>{c.nome}</strong>
+          <div
+            key={c.id}
+            style={cardStyle}
+          >
+
+            <div style={{ width: "100%" }}>
+
+              <strong>{c.nome}</strong>
+
+              <p style={{
+                fontSize: "12px",
+                color: "#666"
+              }}>
+                {c.produtos?.length || 0} produto(s)
+              </p>
+
+              <input
+                placeholder="Adicionar produto"
+                value={
+                  categoriaSelecionada === c.id
+                    ? buscaCategoria
+                    : ""
+                }
+                onChange={(e) => {
+                  setCategoriaSelecionada(c.id);
+                  setBuscaCategoria(e.target.value);
+                }}
+                style={inputStyle}
+              />
+
+              {categoriaSelecionada === c.id &&
+                sugestoesCategoria.length > 0 && (
+
+                <div style={{
+                  background: "white",
+                  border: "1px solid #ccc",
+                  borderRadius: "10px",
+                  marginBottom: "10px"
+                }}>
+
+                  {sugestoesCategoria.map((p) => (
+
+                    <div
+                      key={p.id}
+                      onClick={() =>
+                        adicionarProdutoCategoria(c.id, p)
+                      }
+                      style={{
+                        padding: "10px",
+                        cursor: "pointer",
+                        borderBottom: "1px solid #eee"
+                      }}
+                    >
+                      {p.nome}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {c.produtos?.map((p) => (
+
+                <div
+                  key={p.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: "5px",
+                    background: "#fff",
+                    padding: "8px",
+                    borderRadius: "8px"
+                  }}
+                >
+
+                  <span>{p.nome}</span>
+
+                  <button
+                    onClick={() =>
+                      removerProdutoCategoria(
+                        c.id,
+                        p.id
+                      )
+                    }
+                  >
+                    ❌
+                  </button>
+
+                </div>
+              ))}
+            </div>
 
             <div style={{
               display: "flex",
-              gap: "5px"
+              gap: "5px",
+              marginLeft: "10px"
             }}>
+
               <button onClick={() => editarCategoria(c)}>
                 ✏️
               </button>
@@ -617,6 +910,7 @@ export default function Admin() {
               <button onClick={() => removerCategoria(c.id)}>
                 🗑️
               </button>
+
             </div>
 
           </div>
@@ -646,14 +940,103 @@ export default function Admin() {
         </button>
 
         {colecoes.map((c) => (
-          <div key={c.id} style={cardStyle}>
 
-            <strong>{c.nome}</strong>
+          <div
+            key={c.id}
+            style={cardStyle}
+          >
+
+            <div style={{ width: "100%" }}>
+
+              <strong>{c.nome}</strong>
+
+              <p style={{
+                fontSize: "12px",
+                color: "#666"
+              }}>
+                {c.produtos?.length || 0} produto(s)
+              </p>
+
+              <input
+                placeholder="Adicionar produto"
+                value={
+                  colecaoSelecionada === c.id
+                    ? buscaColecao
+                    : ""
+                }
+                onChange={(e) => {
+                  setColecaoSelecionada(c.id);
+                  setBuscaColecao(e.target.value);
+                }}
+                style={inputStyle}
+              />
+
+              {colecaoSelecionada === c.id &&
+                sugestoesColecao.length > 0 && (
+
+                <div style={{
+                  background: "white",
+                  border: "1px solid #ccc",
+                  borderRadius: "10px",
+                  marginBottom: "10px"
+                }}>
+
+                  {sugestoesColecao.map((p) => (
+
+                    <div
+                      key={p.id}
+                      onClick={() =>
+                        adicionarProdutoColecao(c.id, p)
+                      }
+                      style={{
+                        padding: "10px",
+                        cursor: "pointer",
+                        borderBottom: "1px solid #eee"
+                      }}
+                    >
+                      {p.nome}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {c.produtos?.map((p) => (
+
+                <div
+                  key={p.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: "5px",
+                    background: "#fff",
+                    padding: "8px",
+                    borderRadius: "8px"
+                  }}
+                >
+
+                  <span>{p.nome}</span>
+
+                  <button
+                    onClick={() =>
+                      removerProdutoColecao(
+                        c.id,
+                        p.id
+                      )
+                    }
+                  >
+                    ❌
+                  </button>
+
+                </div>
+              ))}
+            </div>
 
             <div style={{
               display: "flex",
-              gap: "5px"
+              gap: "5px",
+              marginLeft: "10px"
             }}>
+
               <button onClick={() => editarColecao(c)}>
                 ✏️
               </button>
@@ -661,6 +1044,7 @@ export default function Admin() {
               <button onClick={() => removerColecao(c.id)}>
                 🗑️
               </button>
+
             </div>
 
           </div>
@@ -826,7 +1210,7 @@ const cardStyle = {
   marginTop: "10px",
   display: "flex",
   justifyContent: "space-between",
-  alignItems: "center"
+  alignItems: "flex-start"
 };
 
 const botaoVerde = {

@@ -14,16 +14,25 @@ export default function Home() {
   const [produtos, setProdutos] = useState([]);
 
   const router = useRouter();
+
   const boxRef = useRef(null);
 
-  // 🔥 FRASE
+  // =========================================
+  // FRASE
+  // =========================================
+
   useEffect(() => {
+
     fetch("https://api.adviceslip.com/advice")
       .then(res => res.json())
       .then(data => setFrase(data.slip.advice));
+
   }, []);
 
-  // 🔥 CARREGAR PRODUTOS
+  // =========================================
+  // PRODUTOS
+  // =========================================
+
   useEffect(() => {
 
     const carregarProdutos = async () => {
@@ -93,7 +102,10 @@ export default function Home() {
 
   }, []);
 
-  // 🔍 GERAR SUGESTÕES
+  // =========================================
+  // BUSCA
+  // =========================================
+
   useEffect(() => {
 
     if (!busca.trim()) {
@@ -126,7 +138,6 @@ export default function Home() {
 
   }, [busca, produtos]);
 
-  // 🔎 PESQUISAR
   const pesquisar = () => {
 
     if (!busca.trim()) return;
@@ -136,7 +147,10 @@ export default function Home() {
     setMostrarSugestoes(false);
   };
 
-  // ⌨️ CONTROLE DO TECLADO
+  // =========================================
+  // TECLADO
+  // =========================================
+
   const handleKeyDown = (e) => {
 
     if (e.key === "ArrowDown") {
@@ -179,7 +193,10 @@ export default function Home() {
     }
   };
 
-  // ❌ FECHAR AO CLICAR FORA
+  // =========================================
+  // FECHAR SUGESTÕES
+  // =========================================
+
   useEffect(() => {
 
     const handleClickOutside = (event) => {
@@ -206,7 +223,10 @@ export default function Home() {
 
   }, []);
 
-  // ✨ DESTACAR TEXTO
+  // =========================================
+  // DESTACAR TEXTO
+  // =========================================
+
   const destacarTexto = (texto, termo) => {
 
     const index =
@@ -236,26 +256,28 @@ export default function Home() {
     );
   };
 
-  // 🎞️ BANNERS
+  // =========================================
+  // BANNERS
+  // =========================================
+
   const bannersPadrao = [
     {
       id: 2,
+      produtoId: "2",
       cor: "#FF8C00",
-      img: "/colar-musgo.png",
-      link: "/produto/2"
+      img: "/colar-musgo.png"
     },
     {
       id: 3,
+      produtoId: "3",
       cor: "#FF4500",
-      img: "/moranguito.png",
-      link: "/produto/3"
+      img: "/moranguito.png"
     }
   ];
 
   const [banners, setBanners] =
     useState(bannersPadrao);
 
-  // 🔥 CARREGAR BANNERS DO ADMIN
   useEffect(() => {
 
     const bannersSalvos =
@@ -273,7 +295,10 @@ export default function Home() {
   const [bannerAtual, setBannerAtual] =
     useState(0);
 
-  // 🔄 AUTO PLAY
+  // =========================================
+  // AUTO PLAY
+  // =========================================
+
   useEffect(() => {
 
     if (banners.length === 0) return;
@@ -290,7 +315,10 @@ export default function Home() {
 
   }, [banners]);
 
-  // ⬅️➡️ TROCAR BANNER
+  // =========================================
+  // TROCAR BANNER
+  // =========================================
+
   const alternarBanner = (direcao) => {
 
     if (banners.length === 0) return;
@@ -314,7 +342,8 @@ export default function Home() {
   return (
     <div style={{ padding: '20px' }}>
 
-      {/* 🔍 BUSCA */}
+      {/* BUSCA */}
+
       <div
         ref={boxRef}
         style={{
@@ -360,7 +389,6 @@ export default function Home() {
           </button>
         </div>
 
-        {/* 📌 SUGESTÕES */}
         {mostrarSugestoes && busca && (
 
           <div style={{
@@ -415,7 +443,8 @@ export default function Home() {
         )}
       </div>
 
-      {/* 🎞️ CARROSSEL */}
+      {/* CARROSSEL */}
+
       {banners.length > 0 && (
 
         <div style={{
@@ -461,9 +490,7 @@ export default function Home() {
           </button>
 
           <Link
-            href={
-              banners[bannerAtual]?.link || "/"
-            }
+            href={`/produto/${banners[bannerAtual]?.produtoId}`}
             style={{
               height: '100%',
               width: '100%',
@@ -474,7 +501,10 @@ export default function Home() {
           >
             <img
               src={banners[bannerAtual]?.img}
-              style={{ height: '85%' }}
+              style={{
+                height: '85%',
+                objectFit: "contain"
+              }}
             />
           </Link>
 
@@ -507,6 +537,7 @@ export default function Home() {
       )}
 
       {/* API */}
+
       <div style={{
         backgroundColor: 'white',
         marginTop: '25px',
@@ -532,6 +563,7 @@ export default function Home() {
       </div>
 
       {/* COLEÇÕES */}
+
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
