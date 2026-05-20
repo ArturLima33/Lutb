@@ -7,11 +7,19 @@ import { useRouter } from "next/navigation";
 export default function Home() {
 
   const [frase, setFrase] = useState("");
+
   const [busca, setBusca] = useState("");
+
   const [sugestoes, setSugestoes] = useState([]);
-  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
-  const [selecionado, setSelecionado] = useState(-1);
-  const [produtos, setProdutos] = useState([]);
+
+  const [mostrarSugestoes, setMostrarSugestoes] =
+    useState(false);
+
+  const [selecionado, setSelecionado] =
+    useState(-1);
+
+  const [itensBusca, setItensBusca] =
+    useState([]);
 
   const router = useRouter();
 
@@ -30,12 +38,12 @@ export default function Home() {
   }, []);
 
   // =========================================
-  // PRODUTOS
+  // PRODUTOS + CATEGORIAS + COLEÇÕES
   // =========================================
 
   useEffect(() => {
 
-    const carregarProdutos = async () => {
+    const carregarTudo = async () => {
 
       try {
 
@@ -54,51 +62,142 @@ export default function Home() {
 
         const data = await res.json();
 
+        // =========================================
+        // PRODUTOS FIXOS
+        // =========================================
+
         const produtosFixos = [
           {
             id: "1",
             nome: "Colar Bolhas",
-            descricao: "colar com bolhas delicadas"
+            descricao:
+              "colar com bolhas delicadas",
+
+            tipo: "produto",
+
+            link: "/produto/1"
           },
           {
             id: "2",
             nome: "Colar Musgo",
-            descricao: "inspiração natural verde musgo"
+            descricao:
+              "inspiração natural verde musgo",
+
+            tipo: "produto",
+
+            link: "/produto/2"
           },
           {
             id: "3",
             nome: "Moranguito",
-            descricao: "colar com pedra vermelha delicada"
+            descricao:
+              "colar com pedra vermelha delicada",
+
+            tipo: "produto",
+
+            link: "/produto/3"
           },
           {
             id: "4",
             nome: "Tesouro Tropical",
-            descricao: "cores vibrantes tropicais"
+            descricao:
+              "cores vibrantes tropicais",
+
+            tipo: "produto",
+
+            link: "/produto/4"
           }
         ];
+
+        // =========================================
+        // PRODUTOS ADMIN
+        // =========================================
 
         const produtosAdmin =
           (data.results || []).map(p => ({
             id: p.objectId,
+
             nome: p.nome || "",
-            descricao: p.desc || ""
+
+            descricao: p.desc || "",
+
+            tipo: "produto",
+
+            link: `/produto/${p.objectId}`
           }));
 
-        setProdutos([
+        // =========================================
+        // CATEGORIAS
+        // =========================================
+
+        const categorias =
+          JSON.parse(
+            localStorage.getItem("categorias")
+          ) || [];
+
+        const categoriasFormatadas =
+          categorias.map(c => ({
+            id: c.id,
+
+            nome: c.nome,
+
+            descricao: "",
+
+            tipo: "categoria",
+
+            link:
+              `/categoria/${c.nome.toLowerCase()}`
+          }));
+
+        // =========================================
+        // COLEÇÕES
+        // =========================================
+
+        const colecoes =
+          JSON.parse(
+            localStorage.getItem("colecoes")
+          ) || [];
+
+        const colecoesFormatadas =
+          colecoes.map(c => ({
+            id: c.id,
+
+            nome: c.nome,
+
+            descricao: "",
+
+            tipo: "coleção",
+
+            link:
+              `/colecao/${c.nome.toLowerCase()}`
+          }));
+
+        // =========================================
+        // JUNTAR TUDO
+        // =========================================
+
+        setItensBusca([
+
           ...produtosFixos,
-          ...produtosAdmin
+
+          ...produtosAdmin,
+
+          ...categoriasFormatadas,
+
+          ...colecoesFormatadas
+
         ]);
 
       } catch (err) {
 
         console.error(
-          "Erro ao carregar produtos:",
+          "Erro ao carregar itens:",
           err
         );
       }
     };
 
-    carregarProdutos();
+    carregarTudo();
 
   }, []);
 
@@ -111,32 +210,55 @@ export default function Home() {
     if (!busca.trim()) {
 
       setSugestoes([]);
+
       setSelecionado(-1);
 
       return;
     }
 
-    const termo = busca.toLowerCase();
+    const termo =
+      busca.toLowerCase().trim();
 
-    const comeca = produtos.filter(p =>
-      p.nome.toLowerCase().startsWith(termo)
-    );
+    const comecaNome = [];
 
-    const contem = produtos.filter(p =>
-      p.nome.toLowerCase().includes(termo) &&
-      !p.nome.toLowerCase().startsWith(termo)
-    );
+    const contemNome = [];
+
+    itensBusca.forEach(item => {
+
+      const nome =
+        item.nome.toLowerCase();
+
+      // PRIORIDADE 1
+      if (nome.startsWith(termo)) {
+
+        comecaNome.push(item);
+
+      }
+
+      // PRIORIDADE 2
+      else if (nome.includes(termo)) {
+
+        contemNome.push(item);
+      }
+    });
 
     const resultado = [
-      ...comeca,
-      ...contem
+
+      ...comecaNome,
+
+      ...contemNome
+
     ];
 
     setSugestoes(resultado);
 
     setSelecionado(-1);
 
-  }, [busca, produtos]);
+  }, [busca, itensBusca]);
+
+  // =========================================
+  // PESQUISAR
+  // =========================================
 
   const pesquisar = () => {
 
@@ -182,9 +304,10 @@ export default function Home() {
         selecionado < sugestoes.length
       ) {
 
-        const item = sugestoes[selecionado];
+        const item =
+          sugestoes[selecionado];
 
-        router.push(`/produto/${item.id}`);
+        router.push(item.link);
 
       } else {
 
@@ -199,11 +322,14 @@ export default function Home() {
 
   useEffect(() => {
 
-    const handleClickOutside = (event) => {
+    const handleClickOutside =
+      (event) => {
 
       if (
         boxRef.current &&
-        !boxRef.current.contains(event.target)
+        !boxRef.current.contains(
+          event.target
+        )
       ) {
 
         setMostrarSugestoes(false);
@@ -227,7 +353,10 @@ export default function Home() {
   // DESTACAR TEXTO
   // =========================================
 
-  const destacarTexto = (texto, termo) => {
+  const destacarTexto = (
+    texto,
+    termo
+  ) => {
 
     const index =
       texto.toLowerCase().indexOf(
@@ -236,16 +365,19 @@ export default function Home() {
 
     if (index === -1) return texto;
 
-    const inicio = texto.slice(0, index);
+    const inicio =
+      texto.slice(0, index);
 
-    const meio = texto.slice(
-      index,
-      index + termo.length
-    );
+    const meio =
+      texto.slice(
+        index,
+        index + termo.length
+      );
 
-    const fim = texto.slice(
-      index + termo.length
-    );
+    const fim =
+      texto.slice(
+        index + termo.length
+      );
 
     return (
       <>
@@ -359,7 +491,7 @@ export default function Home() {
 
           <input
             type="text"
-            placeholder="Buscar produto..."
+            placeholder="Buscar produto, coleção..."
             value={busca}
             onChange={(e) => {
               setBusca(e.target.value);
@@ -405,9 +537,9 @@ export default function Home() {
             {sugestoes.map((p, index) => (
 
               <div
-                key={p.id}
+                key={`${p.tipo}-${p.id}`}
                 onClick={() =>
-                  router.push(`/produto/${p.id}`)
+                  router.push(p.link)
                 }
                 style={{
                   padding: "10px",
@@ -418,13 +550,30 @@ export default function Home() {
                   backgroundColor:
                     selecionado === index
                       ? "#f0f0f0"
-                      : "white"
+                      : "white",
+
+                  display: "flex",
+                  justifyContent:
+                    "space-between",
+                  alignItems: "center"
                 }}
               >
-                {destacarTexto(
-                  p.nome,
-                  busca
-                )}
+
+                <span>
+                  {destacarTexto(
+                    p.nome,
+                    busca
+                  )}
+                </span>
+
+                <span style={{
+                  fontSize: "11px",
+                  fontStyle: "italic",
+                  color: "#777"
+                }}>
+                  {p.tipo}
+                </span>
+
               </div>
             ))}
 

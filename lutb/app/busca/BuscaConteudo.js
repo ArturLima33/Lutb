@@ -4,96 +4,298 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function BuscaConteudo() {
+
   const searchParams = useSearchParams();
+
   const router = useRouter();
+
   const query = searchParams.get("q") || "";
 
-  const [produtos, setProdutos] = useState([]);
-  const [resultados, setResultados] = useState([]);
+  const [itensBusca, setItensBusca] =
+    useState([]);
+
+  const [resultados, setResultados] =
+    useState([]);
+
+  // =========================================
+  // PRODUTOS FIXOS
+  // =========================================
 
   const produtosFixos = [
     {
       id: "1",
       nome: "Colar Bolhas",
-      descricao: "colar com bolhas delicadas",
-      imagem: "/colar-bolhas.png"
+      descricao:
+        "colar com bolhas delicadas",
+
+      imagem: "/colar-bolhas.png",
+
+      tipo: "produto",
+
+      link: "/produto/1"
     },
+
     {
       id: "2",
       nome: "Colar Musgo",
-      descricao: "inspiração natural verde musgo",
-      imagem: "/colar-musgo.png"
+      descricao:
+        "inspiração natural verde musgo",
+
+      imagem: "/colar-musgo.png",
+
+      tipo: "produto",
+
+      link: "/produto/2"
     },
+
     {
       id: "3",
       nome: "Moranguito",
-      descricao: "colar com pedra vermelha delicada",
-      imagem: "/moranguito.png"
+      descricao:
+        "colar com pedra vermelha delicada",
+
+      imagem: "/moranguito.png",
+
+      tipo: "produto",
+
+      link: "/produto/3"
     },
+
     {
       id: "4",
       nome: "Tesouro Tropical",
-      descricao: "cores vibrantes tropicais",
-      imagem: "/tropical.png"
+      descricao:
+        "cores vibrantes tropicais",
+
+      imagem: "/tropical.png",
+
+      tipo: "produto",
+
+      link: "/produto/4"
     }
   ];
 
-  // 🔥 CARREGA PRODUTOS DINÂMICOS
+  // =========================================
+  // CARREGAR TUDO
+  // =========================================
+
   useEffect(() => {
-    const carregar = async () => {
-      const res = await fetch("https://parseapi.back4app.com/classes/Produto", {
-        headers: {
-          "X-Parse-Application-Id": "YiHW7CkrLOQwTbVFzuSWCopoensMUgLXTzhiEROz",
-          "X-Parse-REST-API-Key": "OaBOq7zWF7Fc8GNcyprMmqu2m1LA75tGwvUDWm6a",
-        },
-      });
 
-      const data = await res.json();
+    const carregarTudo = async () => {
 
-      const dinamicos = (data.results || []).map(p => ({
-        id: p.objectId,
-        nome: p.nome || "",
-        descricao: p.desc || "",
-        imagem: p.img && p.img !== "" ? p.img : "/logo(lutb).png"
-      }));
+      try {
 
-      setProdutos([...produtosFixos, ...dinamicos]);
+        const res = await fetch(
+          "https://parseapi.back4app.com/classes/Produto",
+          {
+            headers: {
+              "X-Parse-Application-Id":
+                "YiHW7CkrLOQwTbVFzuSWCopoensMUgLXTzhiEROz",
+
+              "X-Parse-REST-API-Key":
+                "OaBOq7zWF7Fc8GNcyprMmqu2m1LA75tGwvUDWm6a",
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        // =========================================
+        // PRODUTOS ADMIN
+        // =========================================
+
+        const produtosAdmin =
+          (data.results || []).map(p => ({
+            id: p.objectId,
+
+            nome: p.nome || "",
+
+            descricao: p.desc || "",
+
+            imagem:
+              p.img && p.img !== ""
+                ? p.img
+                : "/logo(lutb).png",
+
+            tipo: "produto",
+
+            link:
+              `/produto/${p.objectId}`
+          }));
+
+        // =========================================
+        // CATEGORIAS
+        // =========================================
+
+        const categorias =
+          JSON.parse(
+            localStorage.getItem("categorias")
+          ) || [];
+
+        const categoriasFormatadas =
+          categorias.map(c => ({
+            id: c.id,
+
+            nome: c.nome || "",
+
+            descricao:
+              c.produtos
+                ?.map(p => p.nome)
+                .join(" ") || "",
+
+            imagem:
+              c.imagem ||
+              "/logo(lutb).png",
+
+            tipo: "categoria",
+
+            link:
+              `/categoria/${c.nome.toLowerCase()}`
+          }));
+
+        // =========================================
+        // COLEÇÕES
+        // =========================================
+
+        const colecoes =
+          JSON.parse(
+            localStorage.getItem("colecoes")
+          ) || [];
+
+        const colecoesFormatadas =
+          colecoes.map(c => ({
+            id: c.id,
+
+            nome: c.nome || "",
+
+            descricao:
+              c.produtos
+                ?.map(p => p.nome)
+                .join(" ") || "",
+
+            imagem:
+              c.imagem ||
+              "/logo(lutb).png",
+
+            tipo: "coleção",
+
+            link:
+              `/colecao/${c.nome.toLowerCase()}`
+          }));
+
+        // =========================================
+        // JUNTAR TUDO
+        // =========================================
+
+        setItensBusca([
+
+          ...produtosFixos,
+
+          ...produtosAdmin,
+
+          ...categoriasFormatadas,
+
+          ...colecoesFormatadas
+
+        ]);
+
+      } catch (err) {
+
+        console.error(
+          "Erro ao carregar itens:",
+          err
+        );
+      }
     };
 
-    carregar();
+    carregarTudo();
+
   }, []);
 
-  // 🔍 BUSCA INTELIGENTE
+  // =========================================
+  // BUSCA
+  // =========================================
+
   useEffect(() => {
-    if (!query || produtos.length === 0) {
+
+    if (
+      !query ||
+      itensBusca.length === 0
+    ) {
+
       setResultados([]);
+
       return;
     }
 
-    const termo = query.toLowerCase().trim();
+    const termo =
+      query.toLowerCase().trim();
 
-    const nomeMatch = [];
-    const descricaoMatch = [];
+    const comecaNome = [];
 
-    produtos.forEach(p => {
-      const nome = p.nome.toLowerCase();
-      const desc = p.descricao.toLowerCase();
+    const contemNome = [];
 
-      if (nome.includes(termo)) {
-        nomeMatch.push(p);
-      } else if (desc.includes(termo)) {
-        descricaoMatch.push(p);
+    const contemDescricao = [];
+
+    itensBusca.forEach(item => {
+
+      const nome =
+        item.nome.toLowerCase();
+
+      const desc =
+        item.descricao.toLowerCase();
+
+      // =========================================
+      // PRIORIDADE 1
+      // =========================================
+
+      if (nome.startsWith(termo)) {
+
+        comecaNome.push(item);
+      }
+
+      // =========================================
+      // PRIORIDADE 2
+      // =========================================
+
+      else if (
+        nome.includes(termo)
+      ) {
+
+        contemNome.push(item);
+      }
+
+      // =========================================
+      // PRIORIDADE 3
+      // Apenas produtos pela descrição
+      // =========================================
+
+      else if (
+        item.tipo === "produto" &&
+        desc.includes(termo)
+      ) {
+
+        contemDescricao.push(item);
       }
     });
 
-    setResultados([...nomeMatch, ...descricaoMatch]);
+    setResultados([
 
-  }, [query, produtos]);
+      ...comecaNome,
+
+      ...contemNome,
+
+      ...contemDescricao
+
+    ]);
+
+  }, [query, itensBusca]);
 
   return (
     <div style={{ padding: "20px" }}>
 
-      {/* 🔙 VOLTAR BONITO */}
+      {/* VOLTAR */}
+
       <button
         onClick={() => router.back()}
         style={{
@@ -111,46 +313,105 @@ export default function BuscaConteudo() {
         ←
       </button>
 
-      <h2>Resultados para: "{query}"</h2>
+      <h2>
+        Resultados para: "{query}"
+      </h2>
+
+      {/* SEM RESULTADOS */}
 
       {resultados.length === 0 ? (
-        <div style={{ marginTop: "40px", textAlign: "center", color: "#777" }}>
-          <img src="/empty.png" style={{ width: "150px", opacity: 0.6 }} />
-          <p>Nenhum produto encontrado 😢</p>
+
+        <div style={{
+          marginTop: "40px",
+          textAlign: "center",
+          color: "#777"
+        }}>
+          <img
+            src="/empty.png"
+            style={{
+              width: "150px",
+              opacity: 0.6
+            }}
+          />
+
+          <p>
+            Nenhum resultado encontrado 😢
+          </p>
         </div>
+
       ) : (
+
         <div style={{
           marginTop: "20px",
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns:
+            "1fr 1fr",
           gap: "15px"
         }}>
-          {resultados.map(p => (
+
+          {resultados.map(item => (
+
             <div
-              key={p.id}
-              onClick={() => router.push(`/produto/${p.id}`)}
+              key={`${item.tipo}-${item.id}`}
+
+              onClick={() =>
+                router.push(item.link)
+              }
+
               style={{
                 background: "white",
                 borderRadius: "15px",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+                boxShadow:
+                  "0 4px 10px rgba(0,0,0,0.1)",
+
                 cursor: "pointer",
+
                 overflow: "hidden"
               }}
             >
+
               <img
-                src={p.imagem}
+                src={item.imagem}
                 style={{
                   width: "100%",
                   height: "140px",
-                  objectFit: "contain" // 🔥 melhor que cover (sem zoom)
+                  objectFit: "contain"
                 }}
               />
 
-              <div style={{ padding: "10px" }}>
-                <h3>{p.nome}</h3>
-                <p style={{ fontSize: "14px", color: "#555" }}>
-                  {p.descricao}
+              <div style={{
+                padding: "10px"
+              }}>
+
+                <div style={{
+                  display: "flex",
+                  justifyContent:
+                    "space-between",
+                  alignItems: "center",
+                  gap: "10px"
+                }}>
+
+                  <h3>
+                    {item.nome}
+                  </h3>
+
+                  <span style={{
+                    fontSize: "11px",
+                    fontStyle: "italic",
+                    color: "#777"
+                  }}>
+                    {item.tipo}
+                  </span>
+
+                </div>
+
+                <p style={{
+                  fontSize: "14px",
+                  color: "#555"
+                }}>
+                  {item.descricao}
                 </p>
+
               </div>
             </div>
           ))}
