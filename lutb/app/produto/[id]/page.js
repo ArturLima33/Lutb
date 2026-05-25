@@ -1,6 +1,7 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function ProdutoDetalhe() {
   const { id } = useParams();
@@ -16,17 +17,15 @@ export default function ProdutoDetalhe() {
         { id: "4", nome: "Tesouro Tropical", preco: "35,00", img: "/tesouro-tropical.png", desc: "Explosão de cores tropicais." }
       ];
 
-      const res = await fetch("https://parseapi.back4app.com/classes/Produto", {
-        headers: {
-          "X-Parse-Application-Id": "YiHW7CkrLOQwTbVFzuSWCopoensMUgLXTzhiEROz",
-          "X-Parse-REST-API-Key": "OaBOq7zWF7Fc8GNcyprMmqu2m1LA75tGwvUDWm6a",
-        },
-      });
-      const data = await res.json();
+      const { data, error } = await supabase
+        .from("Produto")
+        .select("*");
+
+      const resultados = data || [];
       
-      const produtosAdmin = (data.results || []).map((p) => ({
+      const produtosAdmin = resultados.map((p) => ({
         ...p,
-        id: p.objectId,
+        id: p.id,
         preco: p.preco || null,
         img: p.img && p.img !== "" ? p.img : "/logo(lutb).png",
         desc: p.desc || "Lorem ipsum dolor sit amet."

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 export default function Catalogo() {
   const [produtos, setProdutos] = useState([]);
@@ -15,22 +16,19 @@ export default function Catalogo() {
 
   useEffect(() => {
     const carregarProdutos = async () => {
-      const res = await fetch("https://parseapi.back4app.com/classes/Produto", {
-        headers: {
-          "X-Parse-Application-Id": "YiHW7CkrLOQwTbVFzuSWCopoensMUgLXTzhiEROz",
-          "X-Parse-REST-API-Key": "OaBOq7zWF7Fc8GNcyprMmqu2m1LA75tGwvUDWm6a",
-        },
-      });
+      const { data, error } = await supabase
+        .from("Produto")
+        .select("*");
 
-      const data = await res.json();
+      const resultados = data || [];
 
-      const produtosAdmin = (data.results || []).map((p) => ({
+      const produtosAdmin = resultados.map((p) => ({
         ...p,
-        id: p.objectId,
+        id: p.id,
         preco: p.preco || null,
         img: p.img && p.img !== "" ? p.img : "/logo(lutb).png",
         desc: p.desc || "Descrição não informada.",
-        createdAt: p.createdAt || new Date().toISOString()
+        createdAt: p.created_at || p.createdAt || new Date().toISOString()
       }));
 
       setProdutos([...produtosFixos, ...produtosAdmin]);
@@ -39,18 +37,12 @@ export default function Catalogo() {
     carregarProdutos();
   }, []);
 
-  // 🔢 transforma preço em número (ou Infinity se inválido)
   const getPrecoNumero = (preco) => {
     if (!preco) return Infinity;
-
-    const numero = parseFloat(
-      preco.toString().replace(",", ".")
-    );
-
+    const numero = parseFloat(preco.toString().replace(",", "."));
     return isNaN(numero) ? Infinity : numero;
   };
 
-  // 📊 ordenação
   const produtosOrdenados = [...produtos].sort((a, b) => {
     const precoA = getPrecoNumero(a.preco);
     const precoB = getPrecoNumero(b.preco);
@@ -78,8 +70,6 @@ export default function Catalogo() {
 
   return (
     <div style={{ padding: '0 20px 40px 20px' }}>
-
-      {/* TÍTULO */}
       <div style={{ 
         backgroundColor: 'white', 
         borderRadius: '15px', 
@@ -93,11 +83,10 @@ export default function Catalogo() {
         </h2>
       </div>
 
-      {/* 🔽 FILTRO */}
       <div style={{
         marginBottom: "25px",
         display: "flex",
-        justifyContent: "center"
+        justify: "center"
       }}>
         <select
           value={ordenacao}
@@ -119,7 +108,6 @@ export default function Catalogo() {
         </select>
       </div>
 
-      {/* PRODUTOS */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
         {produtosOrdenados.map((p) => (
           <Link href={`/produto/${p.id}`} key={p.id} style={{ textDecoration: 'none' }}>
@@ -164,7 +152,7 @@ export default function Catalogo() {
                 fontWeight: 'bold', 
                 color: '#2D2D1A' 
               }}>
-                {p.preco ? `R$ ${p.preco}` : "Preço indisponível"}
+                {p.preco ? `R$ ${p.preco}` : "Preço indisponível !"}
               </p>
             </div>
           </Link>

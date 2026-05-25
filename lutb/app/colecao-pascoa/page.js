@@ -12,7 +12,7 @@ export default function ColecaoPascoa() {
     { 
       id: 2, 
       nome: "Colar Musgo", 
-      desc: "Representando o renascimento da natureza, o Colar Musgo utiliza elementos orgânicos. Sugestão: Ideal para eventos ao ar livre e celebrações familiares.",
+      desc: "Representando o renascimento da natureza, o Colar Musgo utiliza elementos orgânicos. Sugestão: Ideal para events ao ar livre e celebrações familiares.",
       img: "/colar-musgo.png" 
     }
   ];

@@ -28,7 +28,7 @@ const produtos = [
   {
     id: 5,
     nome: "Novo Colar",
-    descricao: "Novo colar elegante feito com design moderno e materiais sustentáveis. Sugestão: perfeito para eventos formais e uso diário com estilo.",
+    descricao: "Novo colar elegante feito with design moderno e materiais sustentáveis. Sugestão: perfeito para eventos formais e uso diário com estilo.",
     img: "/novo-colar.png",
   },
 ];
