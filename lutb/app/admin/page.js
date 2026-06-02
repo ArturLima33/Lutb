@@ -118,21 +118,21 @@ export default function Admin() {
 
   const adicionarCampoImagem = () => setImagens([...imagens, ""]);
   const removerArquivoAdicional = (index) =>
-  setArquivosLocaisAdicionais(
-    arquivosLocaisAdicionais.filter((_, i) => i !== index)
-  );
+    setArquivosLocaisAdicionais(
+      arquivosLocaisAdicionais.filter((_, i) => i !== index)
+    );
   const atualizarImagem = (index, valor) => { const novas = [...imagens]; novas[index] = valor; setImagens(novas); };
   const removerImagemLink = (index) => setImagens(imagens.filter((_, i) => i !== index));
   const moverArquivo = (origem, destino) => {
-  const novaLista = [...arquivosLocaisAdicionais];
+    const novaLista = [...arquivosLocaisAdicionais];
 
-  const itemMovido = novaLista[origem];
+    const itemMovido = novaLista[origem];
 
-  novaLista.splice(origem, 1);
-  novaLista.splice(destino, 0, itemMovido);
+    novaLista.splice(origem, 1);
+    novaLista.splice(destino, 0, itemMovido);
 
-  setArquivosLocaisAdicionais(novaLista);
-};
+    setArquivosLocaisAdicionais(novaLista);
+  };
 
   const limparFormProduto = () => {
     setNome(""); setPreco(""); setDesc(""); setImg(""); setImagens([]);
@@ -142,7 +142,7 @@ export default function Admin() {
 
   const salvarProduto = async () => {
     if (!nome.trim()) { alert("Nome obrigatório!"); return; }
-    
+
     const imagemPrincipalFinal = arquivoLocalImg || img || null;
     const dados = { nome, preco, descricao: desc, img: imagemPrincipalFinal };
     let produtoId = editandoId;
@@ -175,7 +175,7 @@ export default function Admin() {
 
   const editarProduto = async (p) => {
     setNome(p.nome); setPreco(p.preco || ""); setDesc(p.descricao || ""); setEditandoId(p.id);
-    
+
     if (p.img && p.img.includes("supabase.co/storage")) {
       setArquivoLocalImg(p.img);
       setImg("");
@@ -186,10 +186,10 @@ export default function Admin() {
 
     const { data: imgs } = await supabase.from("produto_imagem").select("url").eq("produto_id", p.id).order("ordem");
     const urlsBuscadas = (imgs || []).map(i => i.url);
-    
+
     const doStorage = urlsBuscadas.filter(url => url.includes("supabase.co/storage"));
     const deLinks = urlsBuscadas.filter(url => !url.includes("supabase.co/storage"));
-    
+
     setImagens(deLinks);
     setArquivosLocaisAdicionais(doStorage);
 
@@ -222,9 +222,9 @@ export default function Admin() {
     carregarCategorias();
   };
 
-  const editarCategoria = (c) => { 
-    setNomeCategoria(c.nome); 
-    setEditandoCategoria(c.id); 
+  const editarCategoria = (c) => {
+    setNomeCategoria(c.nome);
+    setEditandoCategoria(c.id);
     if (c.imagem && c.imagem.includes("supabase.co/storage")) {
       setArquivoLocalCategoria(c.imagem);
       setImagemCategoria("");
@@ -321,11 +321,11 @@ export default function Admin() {
           <h2 style={{ margin: 0 }}>Produtos</h2>
           {editandoId && <button onClick={limparFormProduto} style={botaoCancelarDestacado}>CANCELAR EDIÇÃO ×</button>}
         </div>
-        
+
         <input placeholder="Nome *" value={nome} onChange={(e) => setNome(e.target.value)} style={inputStyle} />
         <input placeholder="Preço (ex: 35,00)" value={preco} onChange={(e) => setPreco(e.target.value)} style={inputStyle} />
         <textarea placeholder="Descrição" value={desc} onChange={(e) => setDesc(e.target.value)} style={{ ...inputStyle, minHeight: "80px" }} />
-        
+
         <div style={subSeccionStyle}>
           <p style={{ fontWeight: "bold", margin: "0 0 12px 0", fontSize: "14px", color: "#2c3e50" }}>🔗 Opção A: Inserir Mídias via Link externo (URL)</p>
           <input placeholder="Colar endereço/link da imagem principal" value={img} onChange={(e) => setImg(e.target.value)} style={inputStyle} />
@@ -346,9 +346,9 @@ export default function Admin() {
             <label style={fileLabelStyle}>
               📷 Carregar arquivo para a Imagem Principal
               <input type="file" accept="image/*,video/*" onChange={async (e) => {
-                if(e.target.files?.[0]) {
+                if (e.target.files?.[0]) {
                   const url = await fazerUploadArquivo(e.target.files[0]);
-                  if(url) setArquivoLocalImg(url);
+                  if (url) setArquivoLocalImg(url);
                 }
               }} style={{ display: "none" }} />
             </label>
@@ -369,23 +369,23 @@ export default function Admin() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(90px, 1fr))", gap: "10px", marginTop: "12px" }}>
                 {arquivosLocaisAdicionais.map((url, i) => (
                   <div
-                  key={i}
-                  draggable
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData("index", i);
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    const origem = Number(
-                      e.dataTransfer.getData("index")
-                    );
-                    moverArquivo(origem, i);
-                  }}
-                  style={{
-                    ...previewContainerStyle,
-                    cursor: "grab"
+                    key={i}
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("index", i);
                     }}
-                    >
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      const origem = Number(
+                        e.dataTransfer.getData("index")
+                      );
+                      moverArquivo(origem, i);
+                    }}
+                    style={{
+                      ...previewContainerStyle,
+                      cursor: "grab"
+                    }}
+                  >
                     {ehVideo(url) ? <video src={url} style={previewMediaStyle} muted playsInline controls /> : <img src={url} style={previewMediaStyle} alt="" />}
                     <button type="button" onClick={() => removerArquivoAdicional(i)} style={removePreviewButtonStyle}>✕</button>
                   </div>
@@ -403,9 +403,9 @@ export default function Admin() {
           <option value="">Sem coleção</option>
           {colecoes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
         </select>
-        
+
         <button onClick={salvarProduto} style={botaoVerde}>{editandoId ? "✅ Salvar alterações do produto" : "➕ Adicionar novo produto"}</button>
-        
+
         <h3 style={{ marginTop: "30px" }}>Produtos cadastrados</h3>
         {produtos.map((p) => (
           <div key={p.id} style={cardStyle}>
@@ -427,7 +427,7 @@ export default function Admin() {
         </div>
 
         <input placeholder="Nome da categoria *" value={nomeCategoria} onChange={(e) => setNomeCategoria(e.target.value)} style={inputStyle} />
-        
+
         <div style={subSeccionStyle}>
           <p style={{ fontWeight: "bold", margin: "0 0 8px 0", fontSize: "13px" }}>🔗 Link Externo (URL)</p>
           <input placeholder="Colar link da imagem" value={imagemCategoria} onChange={(e) => setImagemCategoria(e.target.value)} style={inputStyle} />
@@ -438,9 +438,9 @@ export default function Admin() {
           <label style={fileLabelStyle}>
             📁 Escolher imagem do dispositivo
             <input type="file" accept="image/*" onChange={async (e) => {
-              if(e.target.files?.[0]) {
+              if (e.target.files?.[0]) {
                 const url = await fazerUploadArquivo(e.target.files[0]);
-                if(url) setArquivoLocalCategoria(url);
+                if (url) setArquivoLocalCategoria(url);
               }
             }} style={{ display: "none" }} />
           </label>
@@ -450,7 +450,7 @@ export default function Admin() {
         </div>
 
         <button onClick={salvarCategoria} style={botaoAzul}>{editandoCategoria ? "✅ Salvar alterações da categoria" : "➕ Adicionar categoria"}</button>
-        
+
         {categorias.map((c) => (
           <div key={c.id} style={cardStyle}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -469,7 +469,7 @@ export default function Admin() {
         </div>
 
         <input placeholder="Nome da coleção *" value={nomeColecao} onChange={(e) => setNomeColecao(e.target.value)} style={inputStyle} />
-        
+
         <div style={subSeccionStyle}>
           <p style={{ fontWeight: "bold", margin: "0 0 8px 0", fontSize: "13px" }}>🔗 Link Externo (URL)</p>
           <input placeholder="Colar link do ícone" value={iconeColecao} onChange={(e) => setIconeColecao(e.target.value)} style={inputStyle} />
@@ -480,9 +480,9 @@ export default function Admin() {
           <label style={fileLabelStyle}>
             📁 Escolher ícone do dispositivo
             <input type="file" accept="image/*" onChange={async (e) => {
-              if(e.target.files?.[0]) {
+              if (e.target.files?.[0]) {
                 const url = await fazerUploadArquivo(e.target.files[0]);
-                if(url) setArquivoLocalColecao(url);
+                if (url) setArquivoLocalColecao(url);
               }
             }} style={{ display: "none" }} />
           </label>
@@ -497,7 +497,7 @@ export default function Admin() {
           <label htmlFor="fixarHome">Fixar na home (máximo 2)</label>
         </div>
         <button onClick={salvarColecao} style={botaoLaranja}>{editandoColecao ? "✅ Salvar alterações da coleção" : "➕ Adicionar coleção"}</button>
-        
+
         {colecoes.map((c) => (
           <div key={c.id} style={cardStyle}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
