@@ -144,10 +144,10 @@ export default function Admin() {
     carregarCategorias();
   };
 
-  // Função gerenciadora do clique do Checkbox com trava de limite máximo
+
   const gerenciarCheckboxHome = (marcado) => {
     if (marcado) {
-      // Conta quantas coleções JÁ estão fixadas na home, excluindo a que está sendo editada atualmente
+      
       const jaFixados = colecoes.filter(c => c.fixar_home && c.id !== editandoColecao).length;
       
       if (jaFixados >= 2) {
