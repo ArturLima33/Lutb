@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import BotaoAdicionarCarrinho from "../components/BotaoAdicionarCarrinho";
 
 export default function BuscaConteudo() {
   const searchParams = useSearchParams();
@@ -233,7 +234,7 @@ export default function BuscaConteudo() {
       </div>
 
       <h2>
-        Resultados para: "{query}"
+        Resultados para: &quot;{query}&quot;
       </h2>
 
       {carregando ? (
@@ -292,6 +293,13 @@ export default function BuscaConteudo() {
                   <p style={{ fontWeight: "bold", color: "#2D2D1A", margin: "5px 0 0 0", fontSize: "15px" }}>
                     R$ {item.preco}
                   </p>
+                )}
+
+                {item.tipo === "produto" && (
+                  <BotaoAdicionarCarrinho
+                    produto={{ id: item.id, nome: item.nome, preco: item.preco, img: item.imagem }}
+                    compacto={true}
+                  />
                 )}
               </div>
             </div>

@@ -3,6 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Midia from "../../components/Midia";
+import BotaoAdicionarCarrinho from "../../components/BotaoAdicionarCarrinho";
 
 export default function ProdutoDetalhe() {
   const { id } = useParams();
@@ -28,7 +29,7 @@ export default function ProdutoDetalhe() {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px" }}>
       <button onClick={() => router.back()} style={{ border: "none", background: "none", alignSelf: "flex-start", cursor: "pointer" }}>
-        <img src="/seta-voltar.png" style={{ width: "50px" }} />
+        <img src="/seta-voltar.png" style={{ width: "50px" }} alt="Voltar" />
       </button>
       <div style={{ backgroundColor: "white", borderRadius: "35px", padding: "20px", width: "100%", maxWidth: "380px", display: "flex", flexDirection: "column", alignItems: "center" }}>
         <div style={{ width: "100%", height: "280px", borderRadius: "20px", overflow: "hidden", background: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -59,6 +60,9 @@ export default function ProdutoDetalhe() {
         <span style={{ fontSize: "36px", fontWeight: "bold" }}>
           {produto.preco ? `R$ ${produto.preco}` : "Preço indisponível"}
         </span>
+      </div>
+      <div style={{ width: "100%", maxWidth: "380px" }}>
+        <BotaoAdicionarCarrinho produto={produto} />
       </div>
     </div>
   );
