@@ -591,7 +591,7 @@ export default function Admin() {
         <h2>Sobre a Loja</h2>
 
         <p style={{ fontSize: "13px", color: "#666", marginBottom: "10px" }}>
-          Este texto aparece na página "Sobre". Deixe em branco para usar o texto padrão.
+          Este texto aparece na página &quot;Sobre&quot;. Deixe em branco para usar o texto padrão.
         </p>
 
         <textarea

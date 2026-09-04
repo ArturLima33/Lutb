@@ -19,11 +19,11 @@ function converterPrecoParaNumero(valor) {
 
   /*
     Casos tratados:
-    "00,99"   -> 0.99
-    "0,99"    -> 0.99
-    "99,90"   -> 99.90
+    "00,99"    -> 0.99
+    "0,99"     -> 0.99
+    "99,90"    -> 99.90
     "1.299,90" -> 1299.90
-    "1299.90" -> 1299.90
+    "1299.90"  -> 1299.90
   */
 
   if (precoTexto.includes(",")) {
@@ -53,32 +53,52 @@ export function CarrinhoProvider({ children }) {
   const [itens, setItens] = useState([]);
   const [carregado, setCarregado] = useState(false);
 
+  /*
+    Carrega o carrinho somente no cliente.
+
+    Isso evita que o servidor renderize uma quantidade de itens
+    diferente da quantidade existente no localStorage do navegador.
+  */
   useEffect(() => {
     const carrinhoSalvo = localStorage.getItem("lutb-carrinho");
 
-    if (carrinhoSalvo) {
-      try {
-        const itensSalvos = JSON.parse(carrinhoSalvo);
+    if (!carrinhoSalvo) {
+      setCarregado(true);
+      return;
+    }
 
-        const itensCorrigidos = itensSalvos.map((item) => ({
-          ...item,
-          preco: converterPrecoParaNumero(item.preco),
-        }));
+    try {
+      const itensSalvos = JSON.parse(carrinhoSalvo);
 
-        setItens(itensCorrigidos);
-      } catch (error) {
-        console.error("Erro ao carregar carrinho:", error);
-        localStorage.removeItem("lutb-carrinho");
+      if (!Array.isArray(itensSalvos)) {
+        setCarregado(true);
+        return;
       }
+
+      const itensConvertidos = itensSalvos.map((item) => ({
+        ...item,
+        preco: converterPrecoParaNumero(item.preco),
+      }));
+
+      setItens(itensConvertidos);
+    } catch (error) {
+      console.error("Erro ao carregar carrinho:", error);
+      localStorage.removeItem("lutb-carrinho");
     }
 
     setCarregado(true);
   }, []);
 
+  /*
+    Salva alterações somente depois que o carregamento inicial
+    do localStorage terminou.
+  */
   useEffect(() => {
-    if (carregado) {
-      localStorage.setItem("lutb-carrinho", JSON.stringify(itens));
+    if (!carregado) {
+      return;
     }
+
+    localStorage.setItem("lutb-carrinho", JSON.stringify(itens));
   }, [itens, carregado]);
 
   function adicionarProduto(produto) {
@@ -87,13 +107,20 @@ export function CarrinhoProvider({ children }) {
     const produtoFormatado = {
       id: produto.id,
       nome: produto.nome || produto.name || "Produto sem nome",
-      preco: converterPrecoParaNumero(produto.preco || produto.price || 0),
-      imagem: produto.imagem || produto.image || produto.foto || null,
+      preco: converterPrecoParaNumero(
+        produto.preco || produto.price || 0
+      ),
+      imagem:
+        produto.imagem ||
+        produto.image ||
+        produto.foto ||
+        null,
     };
 
     setItens((itensAtuais) => {
       const produtoJaExiste = itensAtuais.some(
-        (item) => String(item.id) === String(produtoFormatado.id)
+        (item) =>
+          String(item.id) === String(produtoFormatado.id)
       );
 
       if (produtoJaExiste) {
@@ -106,7 +133,9 @@ export function CarrinhoProvider({ children }) {
 
   function removerProduto(id) {
     setItens((itensAtuais) =>
-      itensAtuais.filter((item) => String(item.id) !== String(id))
+      itensAtuais.filter(
+        (item) => String(item.id) !== String(id)
+      )
     );
   }
 
@@ -142,7 +171,9 @@ export function useCarrinho() {
   const contexto = useContext(CarrinhoContext);
 
   if (!contexto) {
-    throw new Error("useCarrinho deve ser usado dentro de CarrinhoProvider");
+    throw new Error(
+      "useCarrinho deve ser usado dentro de CarrinhoProvider"
+    );
   }
 
   return contexto;

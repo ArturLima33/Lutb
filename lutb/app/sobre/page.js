@@ -1,20 +1,27 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 const TEXTO_PADRAO = `Esta página está em desenvolvimento. Em breve você encontrará aqui informações sobre nossa história, missão, valores e tudo o que torna a LUTB um lugar especial.`;
 
 export default function SobrePage() {
-  const [texto, setTexto] = useState("");
-  const [mural, setMural] = useState([]);
-  const [fotoSelecionada, setFotoSelecionada] = useState(null);
+  const [texto, setTexto] = useState(() =>
+    typeof window !== "undefined"
+      ? localStorage.getItem("sobre-texto") || ""
+      : ""
+  );
 
-  useEffect(() => {
-    const textoSalvo = localStorage.getItem("sobre-texto") || "";
-    const muralSalvo = JSON.parse(localStorage.getItem("sobre-mural") || "[]");
-    setTexto(textoSalvo);
-    setMural(muralSalvo);
-  }, []);
+  const [mural, setMural] = useState(() => {
+    if (typeof window === "undefined") return [];
+
+    try {
+      return JSON.parse(localStorage.getItem("sobre-mural") || "[]");
+    } catch {
+      return [];
+    }
+  });
+
+  const [fotoSelecionada, setFotoSelecionada] = useState(null);
 
   const textoExibido = texto.trim() ? texto : TEXTO_PADRAO;
 

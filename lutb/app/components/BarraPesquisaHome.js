@@ -7,7 +7,6 @@ export default function BarraPesquisaHome() {
   const router = useRouter();
   const [buscaInterna, setBuscaInterna] = useState("");
   const [itensBusca, setItensBusca] = useState([]);
-  const [sugestoes, setSugestoes] = useState([]);
   const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
   const [selecionado, setSelecionado] = useState(-1);
   const boxRef = useRef(null);
@@ -56,19 +55,21 @@ export default function BarraPesquisaHome() {
     carregarDadosSugestoes();
   }, []);
 
-  useEffect(() => {
-    if (!buscaInterna.trim() || itensBusca.length === 0) {
-      setSugestoes([]);
-      setSelecionado(-1);
-      return;
-    }
+  const sugestoes = (() => {
+    if (!buscaInterna.trim() || itensBusca.length === 0) return [];
+
     const termo = buscaInterna.toLowerCase();
-    const comeca = itensBusca.filter(p => p.nome.toLowerCase().startsWith(termo));
-    const contem = itensBusca.filter(p => p.nome.toLowerCase().includes(termo) && !p.nome.toLowerCase().startsWith(termo));
-    
-    setSugestoes([...comeca, ...contem].slice(0, 5));
-    setSelecionado(-1);
-  }, [buscaInterna, itensBusca]);
+    const comeca = itensBusca.filter(p =>
+      p.nome.toLowerCase().startsWith(termo)
+    );
+    const contem = itensBusca.filter(
+      p =>
+        p.nome.toLowerCase().includes(termo) &&
+        !p.nome.toLowerCase().startsWith(termo)
+    );
+
+    return [...comeca, ...contem].slice(0, 5);
+  })();
 
   const ejecutarPesquisa = () => {
     if (!buscaInterna.trim()) return;
