@@ -1,13 +1,14 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import "./globals.css";
 import { supabase } from "@/lib/supabase";
 import { CarrinhoProvider, useCarrinho } from "./components/CarrinhoContext";
+import TemaProvider from "./components/TemaProvider";
 
 function HeaderCarrinho() {
   const { quantidade } = useCarrinho();
-
   const exibir = quantidade > 99 ? "+99" : quantidade;
 
   return (
@@ -16,8 +17,8 @@ function HeaderCarrinho() {
       style={{
         width: "60px",
         minHeight: "58px",
-        backgroundColor: "#2D2D2D",
-        color: "white",
+        backgroundColor: "var(--cor-botao)",
+        color: "var(--texto-botao)",
         borderRadius: "12px",
         textDecoration: "none",
         display: "flex",
@@ -32,22 +33,24 @@ function HeaderCarrinho() {
       <span style={{ fontSize: "11px", marginTop: "3px" }}>Carrinho</span>
 
       {quantidade > 0 && (
-        <span style={{
-          position: "absolute",
-          top: "-7px",
-          right: "-7px",
-          backgroundColor: "#E63946",
-          color: "white",
-          borderRadius: "50%",
-          minWidth: "22px",
-          height: "22px",
-          padding: "0 5px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "12px",
-          border: "2px solid #76BA5B",
-        }}>
+        <span
+          style={{
+            position: "absolute",
+            top: "-7px",
+            right: "-7px",
+            backgroundColor: "var(--cor-destaque)",
+            color: "white",
+            borderRadius: "50%",
+            minWidth: "22px",
+            height: "22px",
+            padding: "0 5px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "12px",
+            border: "2px solid var(--bg-principal)",
+          }}
+        >
           {exibir}
         </span>
       )}
@@ -70,68 +73,112 @@ function LayoutConteudo({ children }) {
         .from("Colecao")
         .select("id, nome")
         .order("created_at", { ascending: true });
+
       setColecoes(cols || []);
 
       const { data: cats } = await supabase
         .from("Categoria")
         .select("id, nome")
         .order("created_at", { ascending: true });
+
       setCategorias(cats || []);
     };
+
     carregar();
   }, []);
 
   return (
     <>
       {/* MENU LATERAL */}
-      <div style={{
-        position: "fixed",
-        top: 0,
-        left: isMenuOpen ? 0 : "-100%",
-        width: "280px",
-        height: "100%",
-        backgroundColor: "#2D2D1A",
-        zIndex: 100,
-        transition: "0.3s",
-        padding: "20px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "12px",
-        overflowY: "auto"
-      }}>
-
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: isMenuOpen ? 0 : "-100%",
+          width: "280px",
+          height: "100%",
+          backgroundColor: "var(--bg-menu)",
+          zIndex: 100,
+          transition: "0.3s",
+          padding: "20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+          overflowY: "auto",
+        }}
+      >
         <button
           onClick={closeMenu}
           style={{
             background: "none",
             border: "none",
-            color: "white",
+            color: "var(--texto-footer)",
             fontSize: "24px",
             cursor: "pointer",
             textAlign: "left",
-            marginBottom: "10px"
+            marginBottom: "10px",
           }}
         >
-          <span style={{
-            border: "2px solid white",
-            borderRadius: "50%",
-            width: "30px",
-            height: "30px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }}>×</span>
+          <span
+            style={{
+              border: "2px solid var(--texto-footer)",
+              borderRadius: "50%",
+              width: "30px",
+              height: "30px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            ×
+          </span>
         </button>
 
-        <Link href="/" onClick={closeMenu} style={{ backgroundColor: "#228B22", color: "white", padding: "10px", borderRadius: "25px", textDecoration: "none", textAlign: "center", fontSize: "18px" }}>
+        <Link
+          href="/"
+          onClick={closeMenu}
+          style={{
+            backgroundColor: "var(--cor-primaria)",
+            color: "white",
+            padding: "10px",
+            borderRadius: "25px",
+            textDecoration: "none",
+            textAlign: "center",
+            fontSize: "18px",
+          }}
+        >
           Página Inicial
         </Link>
 
-        <Link href="/catalogo" onClick={closeMenu} style={{ backgroundColor: "#9ACD32", color: "black", padding: "10px", borderRadius: "25px", textDecoration: "none", textAlign: "center", fontSize: "18px" }}>
+        <Link
+          href="/catalogo"
+          onClick={closeMenu}
+          style={{
+            backgroundColor: "var(--cor-secundaria)",
+            color: "var(--texto-principal)",
+            padding: "10px",
+            borderRadius: "25px",
+            textDecoration: "none",
+            textAlign: "center",
+            fontSize: "18px",
+          }}
+        >
           Catálogo
         </Link>
 
-        <Link href="/sobre" onClick={closeMenu} style={{ backgroundColor: "#D2691E", color: "white", padding: "10px", borderRadius: "25px", textDecoration: "none", textAlign: "center", fontSize: "18px" }}>
+        <Link
+          href="/sobre"
+          onClick={closeMenu}
+          style={{
+            backgroundColor: "var(--cor-destaque)",
+            color: "white",
+            padding: "10px",
+            borderRadius: "25px",
+            textDecoration: "none",
+            textAlign: "center",
+            fontSize: "18px",
+          }}
+        >
           Sobre
         </Link>
 
@@ -139,8 +186,8 @@ function LayoutConteudo({ children }) {
           <button
             onClick={() => setProdutosOpen(!produtosOpen)}
             style={{
-              backgroundColor: "#061bdf",
-              color: "white",
+              backgroundColor: "var(--cor-menu-produtos)",
+              color: "var(--texto-menu-produtos)",
               padding: "10px 20px",
               borderRadius: "25px",
               fontSize: "18px",
@@ -149,7 +196,9 @@ function LayoutConteudo({ children }) {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              position: "relative"
+              position: "relative",
+              fontWeight: "bold",
+              boxShadow: "0 3px 8px rgba(0,0,0,0.18)",
             }}
           >
             <span style={{ margin: "0 auto" }}>Produtos</span>
@@ -159,23 +208,64 @@ function LayoutConteudo({ children }) {
           </button>
 
           {produtosOpen && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "0 5px" }}>
-
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+                padding: "0 5px",
+              }}
+            >
               <button
                 onClick={() => setColecoesOpen(!colecoesOpen)}
-                style={{ backgroundColor: "white", color: "black", padding: "8px 20px", borderRadius: "20px", border: "none", fontWeight: "bold", cursor: "pointer" }}
+                style={{
+                  backgroundColor: "var(--cor-menu-colecoes)",
+                  color: "var(--texto-menu-colecoes)",
+                  padding: "8px 20px",
+                  borderRadius: "20px",
+                  border: "none",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                }}
               >
                 Coleções {colecoesOpen ? "▲" : "▼"}
               </button>
 
               {colecoesOpen && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "5px", alignItems: "center" }}>
-                  {colecoes.map(c => (
-                    <Link key={c.id} href={`/colecao/${c.id}`} onClick={closeMenu} style={{ color: "white", textDecoration: "none", fontSize: "14px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "5px",
+                    alignItems: "center",
+                  }}
+                >
+                  {colecoes.map((c) => (
+                    <Link
+                      key={c.id}
+                      href={`/colecao/${c.id}`}
+                      onClick={closeMenu}
+                      style={{
+                        color: "var(--texto-footer)",
+                        textDecoration: "none",
+                        fontSize: "14px",
+                      }}
+                    >
                       {c.nome}
                     </Link>
                   ))}
-                  <Link href="/todas-colecoes" onClick={closeMenu} style={{ color: "white", textDecoration: "none", fontSize: "14px", fontWeight: "bold" }}>
+
+                  <Link
+                    href="/todas-colecoes"
+                    onClick={closeMenu}
+                    style={{
+                      color: "var(--texto-footer)",
+                      textDecoration: "none",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                    }}
+                  >
                     Todas as Coleções
                   </Link>
                 </div>
@@ -183,19 +273,54 @@ function LayoutConteudo({ children }) {
 
               <button
                 onClick={() => setCategoriasOpen(!categoriasOpen)}
-                style={{ backgroundColor: "white", color: "black", padding: "8px 20px", borderRadius: "20px", border: "none", fontWeight: "bold", cursor: "pointer" }}
+                style={{
+                  backgroundColor: "var(--cor-menu-categorias)",
+                  color: "var(--texto-menu-categorias)",
+                  padding: "8px 20px",
+                  borderRadius: "20px",
+                  border: "none",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                }}
               >
                 Categorias {categoriasOpen ? "▲" : "▼"}
               </button>
 
               {categoriasOpen && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "5px", alignItems: "center" }}>
-                  {categorias.map(c => (
-                    <Link key={c.id} href={`/categoria/${c.id}`} onClick={closeMenu} style={{ color: "white", textDecoration: "none", fontSize: "14px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "5px",
+                    alignItems: "center",
+                  }}
+                >
+                  {categorias.map((c) => (
+                    <Link
+                      key={c.id}
+                      href={`/categoria/${c.id}`}
+                      onClick={closeMenu}
+                      style={{
+                        color: "var(--texto-footer)",
+                        textDecoration: "none",
+                        fontSize: "14px",
+                      }}
+                    >
                       {c.nome}
                     </Link>
                   ))}
-                  <Link href="/todas-categorias" onClick={closeMenu} style={{ color: "white", textDecoration: "none", fontSize: "14px", fontWeight: "bold" }}>
+
+                  <Link
+                    href="/todas-categorias"
+                    onClick={closeMenu}
+                    style={{
+                      color: "var(--texto-footer)",
+                      textDecoration: "none",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                    }}
+                  >
                     Todas as Categorias
                   </Link>
                 </div>
@@ -206,21 +331,24 @@ function LayoutConteudo({ children }) {
       </div>
 
       {/* HEADER */}
-      <header style={{
-        padding: "20px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center"
-      }}>
+      <header
+        style={{
+          padding: "20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          backgroundColor: "var(--bg-header)",
+        }}
+      >
         <div
           onClick={() => setIsMenuOpen(true)}
           style={{
-            backgroundColor: "#2D2D2D",
-            color: "white",
+            backgroundColor: "var(--cor-botao)",
+            color: "var(--texto-botao)",
             padding: "10px 14px",
             borderRadius: "12px",
             textAlign: "center",
-            cursor: "pointer"
+            cursor: "pointer",
           }}
         >
           <div style={{ fontSize: "24px" }}>☰</div>
@@ -228,7 +356,11 @@ function LayoutConteudo({ children }) {
         </div>
 
         <Link href="/">
-          <img src="/logo(lutb).png" alt="Logo" style={{ width: "100px", borderRadius: "50%" }} />
+          <img
+            src="/logo(lutb).png"
+            alt="Logo"
+            style={{ width: "100px", borderRadius: "50%" }}
+          />
         </Link>
 
         <HeaderCarrinho />
@@ -237,26 +369,77 @@ function LayoutConteudo({ children }) {
       <main style={{ flex: 1 }}>{children}</main>
 
       {/* FOOTER */}
-      <footer style={{
-        backgroundColor: "#2D2D2D",
-        color: "white",
-        padding: "20px 10px",
-        marginTop: "40px",
-        borderRadius: "30px 30px 0 0",
-        textAlign: "center"
-      }}>
-        <p style={{ marginBottom: "15px", fontSize: "14px" }}>Entre em Contato conosco</p>
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px" }}>
-          <a href="https://instagram.com/lutb.cc" target="_blank" style={{ display: "flex", alignItems: "center", gap: "5px", color: "white", textDecoration: "none", fontSize: "13px" }}>
-            <img src="/instagram.png" width="22" height="22" alt="Insta" />
+      <footer
+        style={{
+          backgroundColor: "var(--bg-footer)",
+          color: "var(--texto-footer)",
+          padding: "20px 10px",
+          marginTop: "40px",
+          borderRadius: "30px 30px 0 0",
+          textAlign: "center",
+        }}
+      >
+        <p style={{ marginBottom: "15px", fontSize: "14px" }}>
+          Entre em Contato conosco
+        </p>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "15px",
+          }}
+        >
+          <a
+            href="https://instagram.com/lutb.cc"
+            target="_blank"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              color: "var(--texto-footer)",
+              textDecoration: "none",
+              fontSize: "13px",
+            }}
+          >
+            <img
+              src="/instagram.png"
+              width="22"
+              height="22"
+              alt="Insta"
+            />
             <span>lutb.cc</span>
           </a>
-          <a href="#" style={{ display: "flex", alignItems: "center", gap: "5px", color: "white", textDecoration: "none", fontSize: "13px" }}>
-            <img src="/whatsapp.png" width="40" height="40" alt="Zap" />
+
+          <a
+            href="#"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "5px",
+              color: "var(--texto-footer)",
+              textDecoration: "none",
+              fontSize: "13px",
+            }}
+          >
+            <img
+              src="/whatsapp.png"
+              width="40"
+              height="40"
+              alt="Zap"
+            />
             <span>(81) xxxx-xxxx</span>
           </a>
         </div>
-        <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.6)", marginTop: "15px" }}>
+
+        <p
+          style={{
+            fontSize: "10px",
+            color: "rgba(255,255,255,0.6)",
+            marginTop: "15px",
+          }}
+        >
           © 2026 LutB. Todos os direitos reservados.
         </p>
       </footer>
@@ -267,14 +450,17 @@ function LayoutConteudo({ children }) {
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-br">
-      <body style={{
-        margin: 0,
-        backgroundColor: "#76BA5B",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        overflowX: "hidden"
-      }}>
+      <body
+        style={{
+          margin: 0,
+          backgroundColor: "var(--bg-principal)",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          overflowX: "hidden",
+        }}
+      >
+        <TemaProvider />
         <CarrinhoProvider>
           <LayoutConteudo>{children}</LayoutConteudo>
         </CarrinhoProvider>

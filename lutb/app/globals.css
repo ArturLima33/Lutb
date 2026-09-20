@@ -1,3 +1,24 @@
+/* ── VARIÁVEIS DE TEMA ── */
+:root {
+  --bg-principal: #76BA5B;
+  --bg-header: #76BA5B;
+  --bg-footer: #2D2D2D;
+  --bg-card: #ffffff;
+  --bg-card-secundario: #f5f5f5;
+  --bg-menu: #2D2D1A;
+  --texto-principal: #2D2D1A;
+  --texto-secundario: #555555;
+  --texto-header: #ffffff;
+  --texto-footer: #ffffff;
+  --cor-primaria: #228B22;
+  --cor-secundaria: #9ACD32;
+  --cor-destaque: #E63946;
+  --cor-botao: #2D2D2D;
+  --texto-botao: #ffffff;
+  --borda-card: transparent;
+  --sombra-card: 0 4px 10px rgba(0,0,0,0.1);
+  --border-radius-card: 25px;
+}
 :root {
   --background-green: #7ED957;
   --header-footer-dark: #2D2D2D;
