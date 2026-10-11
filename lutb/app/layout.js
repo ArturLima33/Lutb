@@ -7,6 +7,9 @@ import { supabase } from "@/lib/supabase";
 import { CarrinhoProvider, useCarrinho } from "./components/CarrinhoContext";
 import TemaProvider from "./components/TemaProvider";
 
+// Roda antes da primeira pintura: aplica o tema salvo e evita o "pisca" do tema padrão
+const SCRIPT_TEMA = `(function(){try{var v=JSON.parse(localStorage.getItem('lutb-tema-vars'));if(!v)return;var r=document.documentElement;for(var k in v){r.style.setProperty(k,v[k]);}r.style.backgroundColor=v['--bg-principal'];var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',v['--bg-header']);}catch(e){}})();`;
+
 function HeaderCarrinho() {
   const { quantidade } = useCarrinho();
   const exibir = quantidade > 99 ? "+99" : quantidade;
@@ -449,12 +452,16 @@ function LayoutConteudo({ children }) {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="pt-br">
+    <html lang="pt-br" suppressHydrationWarning>
+      <head>
+        <meta name="theme-color" content="#76BA5B" />
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
+      </head>
       <body
         style={{
           margin: 0,
           backgroundColor: "var(--bg-principal)",
-          minHeight: "100vh",
+          minHeight: "100dvh",
           display: "flex",
           flexDirection: "column",
           overflowX: "hidden",

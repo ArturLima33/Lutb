@@ -4,6 +4,10 @@ import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
+// Remove acentos e ignora maiúsculas/minúsculas
+const normalizar = (s) =>
+  (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
 export default function Home() {
   const [frase, setFrase] = useState("");
   const [busca, setBusca] = useState("");
@@ -98,27 +102,27 @@ export default function Home() {
     }
   };
 
-    const sugestoes = (() => {
-      if (!busca.trim() || itensBusca.length === 0) return [];
+  const sugestoes = (() => {
+    if (!busca.trim() || itensBusca.length === 0) return [];
 
-      const termo = busca.toLowerCase();
+    const termo = normalizar(busca);
 
-      const comeca = itensBusca.filter(p =>
-        p.nome.toLowerCase().startsWith(termo)
-      );
+    const comeca = itensBusca.filter(p =>
+      normalizar(p.nome).startsWith(termo)
+    );
 
-      const contem = itensBusca.filter(
-        p =>
-          p.nome.toLowerCase().includes(termo) &&
-          !p.nome.toLowerCase().startsWith(termo)
-      );
+    const contem = itensBusca.filter(
+      p =>
+        normalizar(p.nome).includes(termo) &&
+        !normalizar(p.nome).startsWith(termo)
+    );
 
-      return [...comeca, ...contem].slice(0, 5);
-    })();
+    return [...comeca, ...contem].slice(0, 5);
+  })();
 
   const pesquisar = () => {
     if (!busca.trim()) return;
-    router.push(`/busca?q=${busca}`);
+    router.push(`/busca?q=${encodeURIComponent(busca)}`);
     setMostrarSugestoes(false);
   };
 
@@ -142,7 +146,7 @@ export default function Home() {
   }, []);
 
   const destacarTexto = (texto, termo) => {
-    const index = texto.toLowerCase().indexOf(termo.toLowerCase());
+    const index = normalizar(texto).indexOf(normalizar(termo));
     if (index === -1) return texto;
     const inicio = texto.slice(0, index);
     const meio = texto.slice(index, index + termo.length);
@@ -173,7 +177,7 @@ export default function Home() {
 
           {busca && (
             <button 
-              onClick={() => { setBusca(""); setSugestoes([]); }} 
+              onClick={() => { setBusca(""); setMostrarSugestoes(false); }} 
               style={{ background: "none", border: "none", color: "#999", fontSize: "18px", cursor: "pointer", marginRight: "10px", padding: "5px" }}
             >
               ×

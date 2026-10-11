@@ -30,9 +30,9 @@ export default function SobrePage() {
 
       {/* HEADER */}
       <div style={{
-        background: "linear-gradient(135deg, #76BA5B, #4E8E3F)",
+        background: "linear-gradient(135deg, var(--cor-secundaria), var(--cor-primaria))",
         borderRadius: "25px",
-        color: "white",
+        color: "var(--texto-botao)",
         padding: "40px 30px",
         textAlign: "center",
         boxShadow: "0 6px 18px rgba(0,0,0,0.15)",

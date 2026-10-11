@@ -273,7 +273,7 @@ export default function ProdutoDetalhe() {
 
       {/* PREÇO */}
       <div style={{
-        background: "linear-gradient(180deg, #9ACD32, #228B22)",
+        background: "linear-gradient(180deg, var(--cor-secundaria), var(--cor-primaria))",
         width: "100%",
         maxWidth: "380px",
         borderRadius: "20px",
@@ -281,7 +281,7 @@ export default function ProdutoDetalhe() {
         marginTop: "30px",
         textAlign: "center"
       }}>
-        <span style={{ fontSize: "36px", fontWeight: "bold" }}>
+        <span style={{ fontSize: "36px", fontWeight: "bold", color: "var(--texto-botao)" }}>
           {produto.preco ? `R$ ${produto.preco}` : "Preço indisponível"}
         </span>
       </div>

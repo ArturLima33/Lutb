@@ -3,9 +3,25 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
+const CHAVE_ORDEM = "lutb-ordem-todas-categorias";
+
 export default function TodasCategorias() {
   const [categorias, setCategorias] = useState([]);
   const [ordenacao, setOrdenacao] = useState("padrao");
+
+  useEffect(() => {
+    try {
+      const salvo = localStorage.getItem(CHAVE_ORDEM);
+      if (salvo) setOrdenacao(salvo);
+    } catch {}
+  }, []);
+
+  const alterarOrdenacao = (valor) => {
+    setOrdenacao(valor);
+    try {
+      localStorage.setItem(CHAVE_ORDEM, valor);
+    } catch {}
+  };
 
   useEffect(() => {
     const carregar = async () => {
@@ -24,13 +40,13 @@ export default function TodasCategorias() {
   });
 
   return (
-    <div style={{ backgroundColor: "#76BA5B", minHeight: "100vh", padding: "40px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <div style={{ backgroundColor: "var(--bg-principal)", minHeight: "100vh", padding: "40px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
       <div style={{ backgroundColor: "white", borderRadius: "15px", padding: "10px 25px", width: "fit-content", margin: "0 auto 20px auto" }}>
         <h2 style={{ margin: 0, fontSize: "20px", color: "#2D2D1A" }}>Todas as Categorias</h2>
       </div>
       {categorias.length > 0 && (
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "25px" }}>
-          <select value={ordenacao} onChange={(e) => setOrdenacao(e.target.value)} style={{ backgroundColor: "#2D2D2D", color: "white", border: "none", borderRadius: "14px", padding: "12px 24px", fontSize: "16px", cursor: "pointer", outline: "none" }}>
+          <select value={ordenacao} onChange={(e) => alterarOrdenacao(e.target.value)} style={{ backgroundColor: "#2D2D2D", color: "white", border: "none", borderRadius: "14px", padding: "12px 24px", fontSize: "16px", cursor: "pointer", outline: "none" }}>
             <option value="padrao">Ordenar por</option>
             <option value="recentes">Mais recentes</option>
             <option value="antigos">Mais antigos</option>

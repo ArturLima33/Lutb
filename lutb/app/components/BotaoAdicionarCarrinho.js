@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useCarrinho } from "./CarrinhoContext";
 
 export default function BotaoAdicionarCarrinho({ produto, compacto = false }) {
-  const { adicionarProduto, itens } = useCarrinho();
+  const { adicionarProduto, removerProduto, itens } = useCarrinho();
   const [mensagem, setMensagem] = useState("");
 
   const jaEstaNoCarrinho = itens.some((item) => String(item.id) === String(produto?.id));
@@ -16,7 +16,8 @@ export default function BotaoAdicionarCarrinho({ produto, compacto = false }) {
     if (!produto?.id) return;
 
     if (jaEstaNoCarrinho) {
-      setMensagem("Já está no carrinho");
+      removerProduto(produto.id);
+      setMensagem("Removido do carrinho");
       setTimeout(() => setMensagem(""), 1600);
       return;
     }
@@ -45,7 +46,7 @@ export default function BotaoAdicionarCarrinho({ produto, compacto = false }) {
           boxShadow: "0 4px 10px rgba(0,0,0,0.18)",
         }}
       >
-        {jaEstaNoCarrinho ? "No carrinho" : "Adicionar ao carrinho"}
+        {jaEstaNoCarrinho ? "Remover do carrinho" : "Adicionar ao carrinho"}
       </button>
 
       {mensagem && (

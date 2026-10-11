@@ -112,6 +112,7 @@ export function CarrinhoProvider({ children }) {
       ),
       imagem:
         produto.imagem ||
+        produto.img ||
         produto.image ||
         produto.foto ||
         null,

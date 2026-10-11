@@ -5,9 +5,25 @@ import { supabase } from "@/lib/supabase";
 import Midia from "../components/Midia";
 import BotaoAdicionarCarrinho from "../components/BotaoAdicionarCarrinho";
 
+const CHAVE_ORDEM = "lutb-ordem-catalogo";
+
 export default function Catalogo() {
   const [produtos, setProdutos] = useState([]);
   const [ordenacao, setOrdenacao] = useState("");
+
+  useEffect(() => {
+    try {
+      const salvo = localStorage.getItem(CHAVE_ORDEM);
+      if (salvo) setOrdenacao(salvo);
+    } catch {}
+  }, []);
+
+  const alterarOrdenacao = (valor) => {
+    setOrdenacao(valor);
+    try {
+      localStorage.setItem(CHAVE_ORDEM, valor);
+    } catch {}
+  };
 
   useEffect(() => {
     const carregarProdutos = async () => {
@@ -39,7 +55,7 @@ export default function Catalogo() {
         <h2 style={{ margin: 0, fontSize: "20px", color: "#2D2D1A", textAlign: "center" }}>Catálogo</h2>
       </div>
       <div style={{ marginBottom: "25px", display: "flex", justifyContent: "center" }}>
-        <select value={ordenacao} onChange={(e) => setOrdenacao(e.target.value)} style={{ padding: "10px", borderRadius: "10px", border: "none", backgroundColor: "#2D2D2D", color: "white", cursor: "pointer" }}>
+        <select value={ordenacao} onChange={(e) => alterarOrdenacao(e.target.value)} style={{ padding: "10px", borderRadius: "10px", border: "none", backgroundColor: "#2D2D2D", color: "white", cursor: "pointer" }}>
           <option value="">Ordenar por</option>
           <option value="preco-asc">Preço: menor → maior</option>
           <option value="preco-desc">Preço: maior → menor</option>

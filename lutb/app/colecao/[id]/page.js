@@ -12,6 +12,22 @@ export default function ColecaoDinamica() {
   const [produtos, setProdutos] = useState([]);
   const [ordenacao, setOrdenacao] = useState("");
 
+  const chaveOrdem = `lutb-ordem-colecao-${id}`;
+
+  useEffect(() => {
+    try {
+      const salvo = localStorage.getItem(chaveOrdem);
+      if (salvo) setOrdenacao(salvo);
+    } catch {}
+  }, [chaveOrdem]);
+
+  const alterarOrdenacao = (valor) => {
+    setOrdenacao(valor);
+    try {
+      localStorage.setItem(chaveOrdem, valor);
+    } catch {}
+  };
+
   useEffect(() => {
     const carregar = async () => {
       const { data: col } = await supabase
@@ -55,7 +71,7 @@ export default function ColecaoDinamica() {
   });
 
   return (
-    <div style={{ backgroundColor: "#76BA5B", minHeight: "100vh", padding: "20px" }}>
+    <div style={{ backgroundColor: "var(--bg-principal)", minHeight: "100vh", padding: "20px" }}>
 
       <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
         <div style={{ backgroundColor: "white", borderRadius: "20px", padding: "15px 30px" }}>
@@ -69,7 +85,7 @@ export default function ColecaoDinamica() {
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
           <select
             value={ordenacao}
-            onChange={e => setOrdenacao(e.target.value)}
+            onChange={e => alterarOrdenacao(e.target.value)}
             style={{
               padding: "10px",
               borderRadius: "10px",

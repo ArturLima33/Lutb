@@ -262,4 +262,21 @@ export function aplicarTema(tema) {
   Object.entries(tema.variaveis).forEach(([chave, valor]) => {
     root.style.setProperty(chave, valor);
   });
+
+  // Pinta o próprio <html> (área de overscroll / fundo atrás do body)
+  root.style.backgroundColor = tema.variaveis["--bg-principal"];
+
+  // Cor da barra de status / navegador no celular
+  let meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute("content", tema.variaveis["--bg-header"]);
+
+  // Guarda as variáveis para o script do layout aplicar antes da primeira pintura
+  try {
+    localStorage.setItem("lutb-tema-vars", JSON.stringify(tema.variaveis));
+  } catch {}
 }

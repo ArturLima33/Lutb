@@ -4,6 +4,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import BotaoAdicionarCarrinho from "../components/BotaoAdicionarCarrinho";
 
+// Remove acentos e ignora maiúsculas/minúsculas
+const normalizar = (s) =>
+  (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
 export default function BuscaConteudo() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -80,14 +84,14 @@ export default function BuscaConteudo() {
       return;
     }
 
-    const termo = query.toLowerCase().trim();
+    const termo = normalizar(query).trim();
     const comecaNome = [];
     const contemNome = [];
     const contemDescricao = [];
 
     itensBusca.forEach(item => {
-      const nome = item.nome.toLowerCase();
-      const desc = item.descricao.toLowerCase();
+      const nome = normalizar(item.nome);
+      const desc = normalizar(item.descricao);
 
       if (nome.startsWith(termo)) {
         comecaNome.push(item);
@@ -111,9 +115,9 @@ export default function BuscaConteudo() {
       setSelecionado(-1);
       return;
     }
-    const termo = buscaInterna.toLowerCase();
-    const comeca = itensBusca.filter(p => p.nome.toLowerCase().startsWith(termo));
-    const contem = itensBusca.filter(p => p.nome.toLowerCase().includes(termo) && !p.nome.toLowerCase().startsWith(termo));
+    const termo = normalizar(buscaInterna);
+    const comeca = itensBusca.filter(p => normalizar(p.nome).startsWith(termo));
+    const contem = itensBusca.filter(p => normalizar(p.nome).includes(termo) && !normalizar(p.nome).startsWith(termo));
     
     setSugestoes([...comeca, ...contem].slice(0, 5));
     setSelecionado(-1);
@@ -121,7 +125,7 @@ export default function BuscaConteudo() {
 
   const executarPesquisa = () => {
     if (!buscaInterna.trim()) return;
-    router.push(`/busca?q=${buscaInterna}`);
+    router.push(`/busca?q=${encodeURIComponent(buscaInterna)}`);
     setMostrarSugestoes(false);
   };
 
@@ -154,7 +158,7 @@ export default function BuscaConteudo() {
   }, []);
 
   const destacarTexto = (texto, termo) => {
-    const index = texto.toLowerCase().indexOf(termo.toLowerCase());
+    const index = normalizar(texto).indexOf(normalizar(termo));
     if (index === -1) return texto;
     const inicio = texto.slice(0, index);
     const meio = texto.slice(index, index + termo.length);

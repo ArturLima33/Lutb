@@ -3,6 +3,10 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
+// Remove acentos e ignora maiúsculas/minúsculas
+const normalizar = (s) =>
+  (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
 export default function BarraPesquisaHome() {
   const router = useRouter();
   const [buscaInterna, setBuscaInterna] = useState("");
@@ -58,14 +62,14 @@ export default function BarraPesquisaHome() {
   const sugestoes = (() => {
     if (!buscaInterna.trim() || itensBusca.length === 0) return [];
 
-    const termo = buscaInterna.toLowerCase();
+    const termo = normalizar(buscaInterna);
     const comeca = itensBusca.filter(p =>
-      p.nome.toLowerCase().startsWith(termo)
+      normalizar(p.nome).startsWith(termo)
     );
     const contem = itensBusca.filter(
       p =>
-        p.nome.toLowerCase().includes(termo) &&
-        !p.nome.toLowerCase().startsWith(termo)
+        normalizar(p.nome).includes(termo) &&
+        !normalizar(p.nome).startsWith(termo)
     );
 
     return [...comeca, ...contem].slice(0, 5);
@@ -73,7 +77,7 @@ export default function BarraPesquisaHome() {
 
   const ejecutarPesquisa = () => {
     if (!buscaInterna.trim()) return;
-    router.push(`/busca?q=${buscaInterna}`);
+    router.push(`/busca?q=${encodeURIComponent(buscaInterna)}`);
     setMostrarSugestoes(false);
   };
 
@@ -107,7 +111,7 @@ export default function BarraPesquisaHome() {
   }, []);
 
   const destacarTexto = (texto, termo) => {
-    const index = texto.toLowerCase().indexOf(termo.toLowerCase());
+    const index = normalizar(texto).indexOf(normalizar(termo));
     if (index === -1) return texto;
     const inicio = texto.slice(0, index);
     const meio = texto.slice(index, index + termo.length);
@@ -132,7 +136,7 @@ export default function BarraPesquisaHome() {
 
         {buscaInterna && (
           <button 
-            onClick={() => { setBuscaInterna(""); setSugestoes([]); }} 
+            onClick={() => { setBuscaInterna(""); setMostrarSugestoes(false); }} 
             style={{ background: "none", border: "none", color: "#999", fontSize: "18px", cursor: "pointer", marginRight: "10px", padding: "5px" }}
           >
             ×

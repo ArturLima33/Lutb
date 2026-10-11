@@ -27,8 +27,12 @@
   --banner-orange: linear-gradient(to right, #FF8C00, #CD853F);
 }
 
+html {
+  background-color: var(--bg-principal);
+}
+
 body {
-  background-color: var(--background-green);
+  background-color: var(--bg-principal);
   margin: 0;
   font-family: Arial, sans-serif;
 }

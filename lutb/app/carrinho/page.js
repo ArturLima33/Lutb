@@ -1,10 +1,43 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 import { useCarrinho } from "../components/CarrinhoContext";
+import Midia from "../components/Midia";
 
 export default function CarrinhoPage() {
   const { itens, total, removerProduto, limparCarrinho, formatarPreco } = useCarrinho();
+  const [imagensProdutos, setImagensProdutos] = useState({});
+
+  const idsChave = itens.map((item) => String(item.id)).join(",");
+
+  useEffect(() => {
+    if (!idsChave) return;
+
+    let cancelado = false;
+
+    const carregarImagens = async () => {
+      const { data } = await supabase
+        .from("Produto")
+        .select("id, img")
+        .in("id", idsChave.split(","));
+
+      if (cancelado) return;
+
+      const mapa = {};
+      (data || []).forEach((p) => {
+        if (p.img) mapa[String(p.id)] = p.img;
+      });
+      setImagensProdutos(mapa);
+    };
+
+    carregarImagens();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [idsChave]);
 
   return (
     <div style={{ padding: "0 20px 40px 20px", minHeight: "70vh" }}>
@@ -49,17 +82,21 @@ export default function CarrinhoPage() {
                 }}
               >
                 <Link href={`/produto/${item.id}`} style={{ flexShrink: 0 }}>
-                  <img
-                    src={item.imagem || "/logo(lutb).png"}
-                    alt={item.nome}
+                  <div
                     style={{
                       width: "86px",
                       height: "86px",
                       borderRadius: "18px",
-                      objectFit: "cover",
+                      overflow: "hidden",
                       backgroundColor: "#f5f5f5",
                     }}
-                  />
+                  >
+                    <Midia
+                      url={imagensProdutos[String(item.id)] || item.imagem || "/logo(lutb).png"}
+                      isMain={false}
+                      style={{ width: "86px", height: "86px" }}
+                    />
+                  </div>
                 </Link>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
